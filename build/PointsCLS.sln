@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_presegmentation", "tes
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pcl_las", "pcl_las\pcl_las.vcxproj", "{BE5F4370-9BFB-43AD-A412-E08819CC1333}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "feature_extract", "feature_extract\feature_extract.vcxproj", "{5F4E5064-6684-4D10-8830-450893BA272B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -39,6 +41,12 @@ Global
 		{BE5F4370-9BFB-43AD-A412-E08819CC1333}.Release|Win32.Build.0 = Release|Win32
 		{BE5F4370-9BFB-43AD-A412-E08819CC1333}.Release|x64.ActiveCfg = Release|x64
 		{BE5F4370-9BFB-43AD-A412-E08819CC1333}.Release|x64.Build.0 = Release|x64
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Debug|Win32.Build.0 = Debug|Win32
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Debug|x64.ActiveCfg = Debug|Win32
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Release|Win32.ActiveCfg = Release|Win32
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Release|Win32.Build.0 = Release|Win32
+		{5F4E5064-6684-4D10-8830-450893BA272B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -210,6 +210,9 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 		y = *( (double *) ( cloud.data.data() + point_size*i +8 ) );
 		z = *( (double *) ( cloud.data.data() + point_size*i +16 ) );
 		intensity = static_cast<uint16_t>(*( (float *) ( cloud.data.data() + point_size*i +24) ));
+
+//		assert(intensity<101);
+
 		val = *( (uint32_t *) ( cloud.data.data() + point_size*i +28) );
 
 		point.SetCoordinates(x, y, z);
