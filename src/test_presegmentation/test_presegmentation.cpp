@@ -17,44 +17,13 @@
 //#include "feature_extract/features_point.h"
 #include "segmentations/duplicate_removing.h"
 #include "segmentations/clustering_density_peaks.h"
+#include "segmentations/height_slicing.h"
 
 
 //#define PCL_
 
 //namespace tpcs{   //tony point cloud segmentation
-struct EIGEN_ALIGN16 MyLasPoint              //定义点类型结构
 
-{
-
-	double x, y, z;                
-
-	float intensity;
-
-	uint32_t classification;
-
-	uint32_t label;
-
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW// 确保new操作符对齐操作
-
-}EIGEN_ALIGN16;// 强制SSE对齐
-
-//}
-
-POINT_CLOUD_REGISTER_POINT_STRUCT(MyLasPoint,// 注册点类型宏
-
-	(double,x,x)
-
-	(double,y,y)
-
-	(double,z,z)
-
-	(float,intensity,intensity)
-
-	(uint32_t, classification, classification)
-
-	(uint32_t, label, label)
-
-)
 
 struct EIGEN_ALIGN16 MyPoint2D              //定义点类型结构
 
@@ -74,6 +43,27 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(MyPoint2D,// 注册点类型宏
 
 	(double,y,y)
 
+	)
+
+struct EIGEN_ALIGN16 PointXYZIL              //定义点类型结构
+
+{
+	PCL_ADD_POINT4D;
+	float intensity;                
+	uint32_t label;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW// 确保new操作符对齐操作
+
+}EIGEN_ALIGN16;// 强制SSE对齐
+
+//}
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZIL,// 注册点类型宏
+
+	(float,x,x)
+	(float,y,y)
+	(float,z,z)
+	(float,intensity,intensity)
+	(uint32_t,label,label)
 	)
 
 
@@ -260,44 +250,151 @@ void test_ProjectionDensityEstimation_XYPlane()
 	writer.write ("G:/pointcloud/Dundas_University/CSF_fitered/off-ground points_prjDen_linearEnhance.las", *outCloud2);
 }
 */
+
+template <typename PointT>
+int slice_segmentation(const pcl::PointCloud<PointT> &cloud, double h_interval, double neighborRadius, double alpha, double beta,
+	std::vector<uint32_t> &labels)
+{
+
+	return 0;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+// 	Eigen::Vector4f origin;
+// 	Eigen::Quaternionf rot;
+// 	int fv;
+// 	pcl::PointCloud<PointXYZIL>::Ptr incloud (new pcl::PointCloud<PointXYZIL>); 
+
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
 	Eigen::Vector4f origin;
 	Eigen::Quaternionf rot;
 	int fv;
-	pcl::PointCloud<pcl::PointXYZL>::Ptr incloud (new pcl::PointCloud<pcl::PointXYZL>); 
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+
+	lasreader.read("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\ngp.las",
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+	
+	double offset_x = boost::math::iround(incloud->points[0].x);
+	double offset_y = boost::math::iround( incloud->points[0].y);
+	double offset_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_x) < 10000) offset_x = 0;
+	if(fabs(offset_y) < 10000) offset_y = 0;
+	if(fabs(offset_z) < 10000) offset_z = 0;
+
+// 	pcl::io::loadPCDFile("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\ngp.pcd", 
+// 	 		*incloud);
+
+	pcl::PointCloud<MyLasPoint>::Ptr unique_cloud (new pcl::PointCloud<MyLasPoint>); 
+	remove_duplicate_points(*incloud, *unique_cloud);
+
+
+	std::vector<uint32_t> global_labels;     //labels for the whole scene
+	std::vector<PointIndices> slice_indices;
+	height_slicing(*unique_cloud, 3.0, slice_indices);
+
+	pcl::PointCloud<MyLasPoint>::Ptr slice_points (new pcl::PointCloud<MyLasPoint>);
+	pcl::ExtractIndices<MyLasPoint> extract;
 	
 
-	pcl::io::loadPCDFile("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\ngp.pcd", 
-	 		*incloud);
-
-	pcl::PointCloud<pcl::PointXYZL>::Ptr unique_cloud (new pcl::PointCloud<pcl::PointXYZL>); 
-	remove_duplicate_points<pcl::PointXYZL>(*incloud, *unique_cloud);
-
-
-	std::vector<int> cluster_centers;
-	std::vector<uint32_t> labels;
-	clustering_by_density_peaks(*unique_cloud, 1.0, cluster_centers, labels);
-
-	//cluster center
-	pcl::PointIndicesPtr center_indices (new pcl::PointIndices);
-	center_indices->indices = cluster_centers;
-	
-	pcl::PointCloud<pcl::PointXYZL>::Ptr cluster_center (new pcl::PointCloud<pcl::PointXYZL>);
-	pcl::ExtractIndices<pcl::PointXYZL> extract;
-	extract.setInputCloud (unique_cloud);
-	extract.setIndices (center_indices);
-	extract.filter (*cluster_center);
-
-	pcl::PCDWriter writer;
-	writer.write<pcl::PointXYZL> ("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\cluster_center.pcd", *cluster_center, true);
-
-	for(int i=0; i<unique_cloud->points.size(); i++)
+	int islice = 0;
+	for(std::vector<PointIndices>::iterator itIndices=slice_indices.begin(); itIndices!=slice_indices.end(); ++itIndices, ++islice)
 	{
-		unique_cloud->points[i].label = labels[i];
+		pcl::PointIndicesPtr sIdx (new pcl::PointIndices);
+		sIdx->indices = *itIndices;
+		extract.setInputCloud (unique_cloud);
+		extract.setIndices (sIdx);
+		extract.filter (*slice_points);
+
+
+		std::vector<int> cluster_centers;
+		std::vector<uint32_t> slabels;	//labels for current slice points 
+		std::vector<double> rhos;
+
+		//extract features 
+		pcl::PointCloud<pcl::PointXYZ>::Ptr features(new pcl::PointCloud<pcl::PointXYZ>);
+		features->width = slice_points->width;
+		features->height = slice_points->height;
+
+		for(int k=0; k < slice_points->points.size(); k++)
+		{
+			pcl::PointXYZ pt;
+
+			pt.x = slice_points->points[k].x - offset_x;
+			pt.y = slice_points->points[k].y - offset_y;
+			pt.z = slice_points->points[k].z - offset_z;
+
+			features->points.push_back(pt);
+		}
+
+		//clustering in feature space
+		clustering_by_density_peaks(*features, 10.0, 3.0, 0.05, cluster_centers, slabels, rhos);
+
+		//cluster center
+		pcl::PointIndicesPtr center_indices (new pcl::PointIndices);
+		center_indices->indices = cluster_centers;
+
+		pcl::PointCloud<MyLasPoint>::Ptr cluster_center (new pcl::PointCloud<MyLasPoint>);
+		//pcl::ExtractIndices<PointXYZIL> extract;
+		extract.setInputCloud (slice_points);
+		extract.setIndices (center_indices);
+		extract.filter (*cluster_center);
+
+		//output 
+		pcl::LASWriter las_writer;
+		pcl::PCLPointCloud2::Ptr outCloud2(new pcl::PCLPointCloud2);
+		pcl::PointCloud<MyLasPoint>::Ptr out_cloud(new pcl::PointCloud<MyLasPoint>);
+
+		char sCenterName[256], sSegmentsName[256];
+
+		sprintf(sCenterName, "G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\sCenters%d.las", islice);
+		sprintf(sSegmentsName, "G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\segment_rhos%d.las", islice);
+
+		out_cloud->height = cluster_center->height;
+		out_cloud->width = cluster_center->width;
+		out_cloud->points.resize(cluster_center->points.size());
+
+		for(int i=0; i<cluster_center->points.size(); i++)
+		{
+			out_cloud->points[i].x = cluster_center->points[i].x;
+			out_cloud->points[i].y = cluster_center->points[i].y;
+			out_cloud->points[i].z = cluster_center->points[i].z;
+			//		out_cloud->points[i].classification = labels[i];
+			//		out_cloud->points[i].intensity = rhos[i];
+			//		unique_cloud->points[i].label = labels[i];
+		}
+
+		pcl::toROSMsg(*out_cloud, *outCloud2);	
+
+		las_writer.write (sCenterName, *outCloud2);
+
+
+		out_cloud->height = slice_points->height;
+		out_cloud->width = slice_points->width;
+		out_cloud->points.resize(slice_points->points.size());
+
+		for(int i=0; i<slice_points->points.size(); i++)
+		{
+			out_cloud->points[i].x = slice_points->points[i].x;
+			out_cloud->points[i].y = slice_points->points[i].y;
+			out_cloud->points[i].z = slice_points->points[i].z;
+			out_cloud->points[i].classification = slabels[i];
+			out_cloud->points[i].intensity = rhos[i];
+			slice_points->points[i].label = slabels[i];
+		}
+
+
+		pcl::toROSMsg(*out_cloud, *outCloud2);	
+
+		las_writer.write (sSegmentsName, *outCloud2);
 	}
 
-	writer.write<pcl::PointXYZL> ("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\segment_cdp.pcd", *unique_cloud, true);
+//	writer.write<pcl::PointXYZL> ("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\segment_cdp.pcd", *unique_cloud, false);
 	return 0;
 }
 

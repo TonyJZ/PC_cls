@@ -11,7 +11,40 @@
 #include <pcl/pcl_exports.h>
 #include <pcl/io/file_io.h>
 
-  
+
+struct EIGEN_ALIGN16 MyLasPoint              //定义点类型结构
+
+{
+
+	double x, y, z;                
+
+	float intensity;
+
+	uint32_t classification;
+
+	uint32_t label;
+
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW// 确保new操作符对齐操作
+
+}EIGEN_ALIGN16;// 强制SSE对齐
+
+//}
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(MyLasPoint,// 注册点类型宏
+
+	(double,x,x)
+
+	(double,y,y)
+
+	(double,z,z)
+
+	(float,intensity,intensity)
+
+	(uint32_t, classification, classification)
+
+	(uint32_t, label, label)
+
+	)
 
 namespace pcl{
 

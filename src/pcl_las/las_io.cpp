@@ -171,9 +171,13 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 	liblas::Header header;
 	liblas::Writer writer(ofs, header);
 
-	double offset_x = (uint32_t)*((double*)( cloud.data.data()));
-	double offset_y = (uint32_t)*((double*)( cloud.data.data() + 8));
-	double offset_z = (uint32_t)*((double*)( cloud.data.data() + 16));
+	double offset_x = (int32_t)*((double*)( cloud.data.data()));
+	double offset_y = (int32_t)*((double*)( cloud.data.data() + 8));
+	double offset_z = (int32_t)*((double*)( cloud.data.data() + 16));
+
+	if(fabs(offset_x) < 10000) offset_x = 0;
+	if(fabs(offset_y) < 10000) offset_y = 0;
+	if(fabs(offset_z) < 10000) offset_z = 0;
 
 	header.SetOffset(offset_x, offset_y, offset_z);
 
@@ -214,6 +218,8 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 //		assert(intensity<101);
 
 		val = *( (uint32_t *) ( cloud.data.data() + point_size*i +28) );
+
+		val = val%256;
 
 		point.SetCoordinates(x, y, z);
 		point.SetIntensity(intensity);

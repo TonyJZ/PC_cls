@@ -34,6 +34,8 @@ int remove_duplicate_points(pcl::PointCloud<PointT> &cloud, pcl::PointCloud<Poin
 	auto unique_end = std::unique(cloud.points.begin(), cloud.points.end(), equalPoint<PointT>);
 
 	unique_cloud.points.assign(cloud.points.begin(), unique_end);
+	unique_cloud.height = 1;
+	unique_cloud.width = unique_cloud.points.size();
 
 	return 0;
 }
