@@ -251,10 +251,71 @@ void test_ProjectionDensityEstimation_XYPlane()
 }
 */
 
+#include "segmentations/DBSCAN.h"
+
 template <typename PointT>
-int slice_segmentation(const pcl::PointCloud<PointT> &cloud, double h_interval, double neighborRadius, double alpha, double beta,
-	std::vector<uint32_t> &labels)
+int clustering_by_DBSCAN(const pcl::PointCloud<PointT> &cloud, double Eps, int MinPts,
+	std::vector<int> &cluster_center_idx, std::vector<uint32_t> &labels, std::vector<double> &rhosout)
 {
+	int nSamples = cloud.points.size();
+
+	point_t *points = new point_t[nSamples];
+
+	for(int i=0; i<nSamples; i++)
+	{
+		points[i].x = cloud.points[i].x;
+		points[i].y = cloud.points[i].y;
+		points[i].z = cloud.points[i].z;
+		points[i].cluster_id = UNCLASSIFIED;
+	}
+
+
+	dbscan( points, nSamples, Eps, MinPts,  euclidean_dist);
+
+
+	labels.resize(nSamples);
+	for(int i=0; i<nSamples; i++)
+	{
+		labels[i] = points[i].cluster_id;
+	}
+
+	rhosout.assign(nSamples, 0);
+
+	if(points)	delete[] points;   points = NULL;
+
+	return 0;
+}
+
+#include "segmentations/OPTICS.h"
+template <typename PointT>
+int clustering_by_optics(const pcl::PointCloud<PointT> &cloud, double Eps, int MinPts,
+	std::vector<int> &cluster_center_idx, std::vector<uint32_t> &labels, std::vector<double> &rhosout)
+{
+	int nSamples = cloud.points.size();
+
+	opt_point_t *points = new opt_point_t[nSamples];
+
+	for(int i=0; i<nSamples; i++)
+	{
+		points[i].x = cloud.points[i].x;
+		points[i].y = cloud.points[i].y;
+		points[i].z = cloud.points[i].z;
+		points[i].cluster_id = UNCLASSIFIED;
+	}
+
+
+	optics( points, nSamples, Eps, MinPts,  euclidean_dist);
+
+
+	labels.resize(nSamples);
+	for(int i=0; i<nSamples; i++)
+	{
+		labels[i] = points[i].cluster_id;
+	}
+
+	rhosout.assign(nSamples, 0);
+
+	if(points)	delete[] points;   points = NULL;
 
 	return 0;
 }
@@ -274,7 +335,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
 
 
-	lasreader.read("G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\ngp.las",
+	lasreader.read("G:\\pointcloud\\Dundas_University\\ALTM_Strip_Dundas.las",
 		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
 
 	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
@@ -333,7 +394,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 
 		//clustering in feature space
-		clustering_by_density_peaks(*features, 10.0, 3.0, 0.05, cluster_centers, slabels, rhos);
+//		clustering_by_density_peaks(*features, 10.0, 4.0, 0.05, cluster_centers, slabels, rhos);
+		
+		//DBSCAN
+//		clustering_by_DBSCAN(*features, 4.0, 4, cluster_centers, slabels, rhos);
+
+		//OPTICS
+		clustering_by_optics(*features, 4.0, 4, cluster_centers, slabels, rhos);
 
 		//cluster center
 		pcl::PointIndicesPtr center_indices (new pcl::PointIndices);
@@ -352,8 +419,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		char sCenterName[256], sSegmentsName[256];
 
-		sprintf(sCenterName, "G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\sCenters%d.las", islice);
-		sprintf(sSegmentsName, "G:\\pointcloud\\Dundas_University\\filtered_by_Chen\\segment_rhos%d.las", islice);
+		sprintf(sCenterName, "G:\\pointcloud\\Dundas_University\\OPTICS\\sCenters%d.las", islice);
+		sprintf(sSegmentsName, "G:\\pointcloud\\Dundas_University\\OPTICS\\segment_neighs%d.las", islice);
 
 		out_cloud->height = cluster_center->height;
 		out_cloud->width = cluster_center->width;
@@ -369,9 +436,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			//		unique_cloud->points[i].label = labels[i];
 		}
 
-		pcl::toROSMsg(*out_cloud, *outCloud2);	
+		if(out_cloud->points.size()>0)
+			pcl::toROSMsg(*out_cloud, *outCloud2);	
 
-		las_writer.write (sCenterName, *outCloud2);
+//		las_writer.write (sCenterName, *outCloud2);
 
 
 		out_cloud->height = slice_points->height;
@@ -388,8 +456,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			slice_points->points[i].label = slabels[i];
 		}
 
-
-		pcl::toROSMsg(*out_cloud, *outCloud2);	
+		if(out_cloud->points.size()>0)
+			pcl::toROSMsg(*out_cloud, *outCloud2);	
 
 		las_writer.write (sSegmentsName, *outCloud2);
 	}

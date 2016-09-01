@@ -28,10 +28,13 @@
     <ClCompile Include="..\..\src\test_presegmentation\test_presegmentation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\segmentations\CHAMELEON.h" />
     <ClInclude Include="..\..\include\segmentations\clustering_density_peaks.h" />
+    <ClInclude Include="..\..\include\segmentations\DBSCAN.h" />
     <ClInclude Include="..\..\include\segmentations\duplicate_removing.h" />
     <ClInclude Include="..\..\include\segmentations\height_slicing.h" />
     <ClInclude Include="..\..\include\segmentations\model_fitting.h" />
+    <ClInclude Include="..\..\include\segmentations\OPTICS.h" />
     <ClInclude Include="..\..\include\segmentations\PCL_Segmentations.h" />
     <ClInclude Include="..\..\src\test_presegmentation\stdafx.h" />
     <ClInclude Include="..\..\src\test_presegmentation\targetver.h" />

@@ -507,7 +507,12 @@ int clustering_by_density_peaks(const pcl::PointCloud<PointT> &cloud, double nei
 	}
 
 #ifdef _DEBUG
-	rhosout = rhos;
+//	rhosout = rhos;
+	rhosout.resize(rhos.size());
+	for(int i=0; i<rhosout.size(); i++)
+	{
+		rhosout[i] = nneigh[i];
+	}
 #endif
 
 	// detect outliers
