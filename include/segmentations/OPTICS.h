@@ -10,8 +10,10 @@
 #include <pcl/point_types.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
+
 #define UNCLASSIFIED -1
 #define NOISE 0
+
 
 #define CORE_POINT 1
 #define NOT_CORE_POINT 0

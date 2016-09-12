@@ -7,11 +7,11 @@
  * Author: Weinan Wang                                *
  ******************************************************/
 
-#include &lt;stdio.h> /* for sscanf, FILE* */
-#include &lt;stdlib.h> /* for calloc, malloc, recalloc, free */
-#include &lt;math.h> /* for sqrt */
-#include &lt;string.h> /* for strlen */
-#include &lt;sys/time.h>
+#include <stdio.h> /* for sscanf, FILE* */
+#include <stdlib.h> /* for calloc, malloc, recalloc, free */
+#include <math.h> /* for sqrt */
+#include <string.h> /* for strlen */
+#include <sys/time.h>
 
 /* !!!!!! */
 /* Define the maximum size of the data points */
@@ -185,7 +185,7 @@ int main(int argc, char * argv[]) {
 
   int i;
 
-  if(gettimeofday(&time_start, NULL)&lt;0)
+  if(gettimeofday(&time_start, NULL)<0)
     {
       printf("time error \n");
       return -1;
@@ -194,13 +194,13 @@ int main(int argc, char * argv[]) {
   printf("ALPHA is %f \n", ALPHA);
 
   /* parse the command line */
- if (parsingInput(argc, argv)&lt;0)
+ if (parsingInput(argc, argv)<0)
    {
      return -1;
    }
 
   /* read in data file */
- if ( readData()&lt;0 )
+ if ( readData()<0 )
    {
       fclose(fp);
       return -1;
@@ -213,13 +213,13 @@ int main(int argc, char * argv[]) {
  /* printData(); */
 
  /* initialize data structure */
- if ( initialize()&lt;0 )
+ if ( initialize()<0 )
    {
      return -1;
    }
 
  /* establish hyperGraph */
- if (establish_hyperGraph()&lt;0)
+ if (establish_hyperGraph()<0)
    {
      return -1;
    }
@@ -240,19 +240,19 @@ int main(int argc, char * argv[]) {
    }
 
  /* begin partitionning, this is a recursive program */
- if(partition(root, left, right)&lt;0)
+ if(partition(root, left, right)<0)
    {
      printf("partition error! \n");
      return -1;
    }
 
- if(phase2()&lt;0)
+ if(phase2()<0)
    {
      printf("phase2 error! \n");
      return -1;
    }
 
- if(clusterResult()&lt;0)
+ if(clusterResult()<0)
    {
      fclose(out_fp);
      printf("clusterResult error! \n");
@@ -260,13 +260,13 @@ int main(int argc, char * argv[]) {
    }
  fclose(out_fp);
 
- for(i=0; i&lt;groupIndex; i++)
+ for(i=0; i<groupIndex; i++)
    {
      free(groups[i]);
      groups[i] = NULL;
    }
 
- if(gettimeofday(&time_end, NULL)&lt;0){
+ if(gettimeofday(&time_end, NULL)<0){
    printf("time error \n");
    return -1;
  }
@@ -324,12 +324,12 @@ static int clusterResult(){
     }
 
   count = 0;
-  for(i=0; i&lt;groupIndex; i++){
+  for(i=0; i<groupIndex; i++){
     if(groupLength[i]>0){
       /* printf("c%d =[\n", count);*/
       fprintf(out_fp, "%% The cluster NO is %d \n", i);
       fprintf(out_fp, "c%d =[", count);
-      for(j=0; j&lt;groupLength[i]; j++){
+      for(j=0; j<groupLength[i]; j++){
 	/* printf("%f %f \n", points[groups[i][j]].x, points[groups[i][j]].y);*/
 	fprintf(out_fp, "%f %f \n", points[groups[i][j]].x, points[groups[i][j]].y);
       }/* end for */
@@ -368,8 +368,8 @@ static int computeAIC_AC(struct node * node0, struct node * node1, float * aic, 
   (* aic) = 0.0;
   (* ac) = 0.0;
   /* count the edges from node0 */
-  for(i=0; i&lt;node0->numberPoints; i++){
-    for(j=0; j&lt;points[node0->points[i]].length; j++){
+  for(i=0; i<node0->numberPoints; i++){
+    for(j=0; j<points[node0->points[i]].length; j++){
       if(belongs(node1, points[node0->points[i]].edges[j].pointNO)>0){
 	(* aic) = (* aic) + points[node0->points[i]].edges[j].similarity;
 	count++;
@@ -378,8 +378,8 @@ static int computeAIC_AC(struct node * node0, struct node * node1, float * aic, 
   }/* end for i */
   /*  printf("!!! aic is %f,", *aic);*/
   /* count the edges from node1 */
-  for(i=0; i&lt;node1->numberPoints; i++){
-    for(j=0; j&lt;points[node1->points[i]].length; j++){
+  for(i=0; i<node1->numberPoints; i++){
+    for(j=0; j<points[node1->points[i]].length; j++){
       if(belongs(node0, points[node1->points[i]].edges[j].pointNO)>0){
 	(* aic) = (* aic) + points[node1->points[i]].edges[j].similarity;
 	count++;
@@ -454,7 +454,7 @@ static float computeGoodness(int group0, int group1){
     printf("cannot allocate memory for node0->points. \n");
     return -1;
   }
-  for(i=0; i&lt;groupLength[group0]; i++){
+  for(i=0; i<groupLength[group0]; i++){
     node0->points[i]=groups[group0][i];
   }/* end for */
 
@@ -467,7 +467,7 @@ static float computeGoodness(int group0, int group1){
     printf("cannot allocate memory for node0->points. \n");
     return -1;
   }
-  for(i=0; i&lt;groupLength[group1]; i++){
+  for(i=0; i<groupLength[group1]; i++){
     node1->points[i]=groups[group1][i];
   }/* end for */
 
@@ -488,7 +488,7 @@ static float computeGoodness(int group0, int group1){
       return -1;
     }/* end if */
     
-    if(cutNode(node0, left0, right0, ubFactor)&lt;0)
+    if(cutNode(node0, left0, right0, ubFactor)<0)
       {
 	printf("cut node0 error! \n");
 	return -1;
@@ -506,7 +506,7 @@ static float computeGoodness(int group0, int group1){
       return -1;
     }/* end if */
     
-    if(cutNode(node1, left1, right1, ubFactor)&lt;0)
+    if(cutNode(node1, left1, right1, ubFactor)<0)
       {
 	printf("cut node0 error! \n");
 	return -1;
@@ -586,7 +586,7 @@ static int merge(int group0, int group1){
     return -1;
   }
   /* move elements from group1 to group0 */
-  for(i=groupLength[group0], j=0; i&lt;(groupLength[group0]+groupLength[group1]); i++, j++){
+  for(i=groupLength[group0], j=0; i<(groupLength[group0]+groupLength[group1]); i++, j++){
     groups[group0][i] = groups[group1][j];
   }/* end for */
 
@@ -623,7 +623,7 @@ static int phase2(){
 	 clusterNO, stopClusterNO);
 #endif
 
-  if(clusterNO&lt;stopClusterNO){
+  if(clusterNO<stopClusterNO){
     printf("at the beginning of phase 2, clusterNO is already smaller than stopClusterNO! error\n");
     return -1;
   }/* end if */
@@ -631,16 +631,16 @@ static int phase2(){
   bestGoodness = 0.0;
   while(clusterNO>stopClusterNO){
     /* the for loop decide which two groups need to be merged */
-    for(i=0; i&lt;(groupIndex-1); i++){
+    for(i=0; i<(groupIndex-1); i++){
       if(groupLength[i]!=0){
 	group0 = i;
-	for(j=(group0+1); j&lt;groupIndex; j++){
+	for(j=(group0+1); j<groupIndex; j++){
 	  if(groupLength[j]!=0){
 	    group1 = j;
 	    
 	    /* Now compute the goodness for merging the two clusters */
 	    goodness = computeGoodness(group0, group1);
-	    if(goodness > 10000 || goodness &lt; 0){
+	    if(goodness > 10000 || goodness < 0){
 	      printf("group0 is %d, group1 is %d,!!!\n", 
 		     group0, group1);
 	      printf("goodness is %f, some thing wrong!\n", goodness);
@@ -675,7 +675,7 @@ static int phase2(){
 
     printf("best goodness is %f \n", bestGoodness);
 
-    if(merge(mergeGroups[0], mergeGroups[1])&lt;0)
+    if(merge(mergeGroups[0], mergeGroups[1])<0)
       {
 	printf("merge error! \n");
 	return -1;
@@ -711,7 +711,7 @@ static int belongs(struct node * sourceNode, int point){
 
   tmp = 0;
 
-  for(i=0; i&lt;sourceNode->numberPoints; i++){
+  for(i=0; i<sourceNode->numberPoints; i++){
     if(sourceNode->points[i] == point)
       {
 	tmp = 1;
@@ -764,14 +764,14 @@ static int cutNode(struct node * source, struct node * left, struct node * right
       return -1;
     }
   /* load the vertice's number into the checkTable */
-  for(i=0; i&lt;nvtxs; i++){
+  for(i=0; i<nvtxs; i++){
     checkTable[i] = source->points[i];
   }/* end for */
 
   /* number of edges */
   tmp=0;
-  for(i=0; i&lt;nvtxs; i++){
-    for(j=0; j&lt;points[source->points[i]].length; j++){
+  for(i=0; i<nvtxs; i++){
+    for(j=0; j<points[source->points[i]].length; j++){
       /* decide a point whether belongs to a node */
       if(belongs(source, points[source->points[i]].edges[j].pointNO)==1) /* !!!!!! */
 	tmp++;
@@ -798,7 +798,7 @@ static int cutNode(struct node * source, struct node * left, struct node * right
       printf("cannot allocate memory for eptr! \n");
       return -1;
     }
-  for(i=0; i&lt;tmp; i++)
+  for(i=0; i<tmp; i++)
     eptr[i]=i*2;
 
   /* when loading eind, need to check the checkTable */
@@ -809,8 +809,8 @@ static int cutNode(struct node * source, struct node * left, struct node * right
       return -1;
     }
   k = 0;
-  for(i=0; i&lt;nvtxs; i++){
-    for(j=0; j&lt;points[source->points[i]].length; j++){
+  for(i=0; i<nvtxs; i++){
+    for(j=0; j<points[source->points[i]].length; j++){
       /* decide a point whether belongs to a node */
       if(belongs(source, points[source->points[i]].edges[j].pointNO)==1){
 	/* eind[k] = source->points[i];*/
@@ -819,7 +819,7 @@ static int cutNode(struct node * source, struct node * left, struct node * right
 	/* eind[k] = points[source->points[i]].edges[j].pointNO; */
 	tmpNO =  points[source->points[i]].edges[j].pointNO;
 	flag = 0;
-	for(l=0; l&lt;nvtxs; l++){
+	for(l=0; l<nvtxs; l++){
 	  if (tmpNO == checkTable[l]){
 	    flag = 1;
 	    found = l;
@@ -852,8 +852,8 @@ static int cutNode(struct node * source, struct node * left, struct node * right
       return -1;
     }
   k = 0;
-  for(i=0; i&lt;nvtxs; i++){
-    for(j=0; j&lt;points[source->points[i]].length; j++){
+  for(i=0; i<nvtxs; i++){
+    for(j=0; j<points[source->points[i]].length; j++){
       /* decide a point whether belongs to a node */
       if(belongs(source, points[source->points[i]].edges[j].pointNO)==1){
 	/*!!!!!! here I have to do a cast becasue now similarity is a double */
@@ -907,7 +907,7 @@ static int cutNode(struct node * source, struct node * left, struct node * right
 
   group0 = 0;
   group1 = 0;
-  for(i=0; i&lt;nvtxs; i++){
+  for(i=0; i<nvtxs; i++){
     if(part[i] == 0)
       group0++;
     else if(part[i] == 1)
@@ -940,7 +940,7 @@ static int cutNode(struct node * source, struct node * left, struct node * right
 
   index0 = 0;
   index1 = 0;
-  for(i=0; i&lt;nvtxs; i++){
+  for(i=0; i<nvtxs; i++){
     if(part[i] == 0)
       {
 	left->points[index0] = checkTable[i];
@@ -992,7 +992,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
   int i;
 
   /* cut the source node into left node and right node */
-  if(cutNode(source, left, right, BC)&lt;0){
+  if(cutNode(source, left, right, BC)<0){
     printf("cutNode error! \n");
     return -1;
   }
@@ -1015,7 +1015,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
 	return -1;
       }
 
-    if(partition(left, l_left, l_right)&lt;0)
+    if(partition(left, l_left, l_right)<0)
       return -1;
 
   }else{
@@ -1026,7 +1026,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
 	printf("cannot allocate memory for groups! \n");
 	return -1;
       }
-    for(i=0;  i&lt;left->numberPoints; i++){
+    for(i=0;  i<left->numberPoints; i++){
       groups[groupIndex][i] = left->points[i];
     }/* end for */
     groupIndex++;
@@ -1041,7 +1041,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
     /*
       printf("%Points in this group include: \n c%d = [", index_matlab);
       index_matlab++;
-      for(i=0; i&lt;left->numberPoints; i++)
+      for(i=0; i<left->numberPoints; i++)
       {
       printf("%f %f \n ", points[left->points[i]].x, points[left->points[i]].y);
       }
@@ -1063,7 +1063,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
 	return -1;
       }
 
-    if(partition(right, r_left, r_right)&lt;0)
+    if(partition(right, r_left, r_right)<0)
       return -1;
   }else{
     groupLength[groupIndex] = right->numberPoints;
@@ -1073,7 +1073,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
 	printf("cannot allocate memory for groups! \n");
 	return -1;
       }
-    for(i=0;  i&lt;right->numberPoints; i++){
+    for(i=0;  i<right->numberPoints; i++){
       groups[groupIndex][i] = right->points[i];
     }/* end for */
     groupIndex++;
@@ -1089,7 +1089,7 @@ static int partition(struct node * source, struct node * left, struct node * rig
     /*
       printf("%Points in this group include: \n c%d =[", index_matlab);
       index_matlab++;
-      for(i=0; i&lt;right->numberPoints; i++)
+      for(i=0; i<right->numberPoints; i++)
       {
       printf("%f %f \n ", points[right->points[i]].x, points[right->points[i]].y);
       }
@@ -1144,19 +1144,19 @@ static int establish_hyperGraph() {
     return -1;
 
   /* find the k_nearest points for each of the N point */
-  for (i=0; i&lt;N; i++){
+  for (i=0; i<N; i++){
     /* compute similarity of point i with each point j */
-    for (j =0; j&lt;N; j++){
+    for (j =0; j<N; j++){
        similarity[j] = computeSimilarity(i,j);
     }/* end for j */
 
     /* find the K_nearest points around point i */
-    for (k=0; k&lt;K_nearest; k++){
+    for (k=0; k<K_nearest; k++){
 
       bestSimi = 0.0;
       indexBestSimi = 0;
 
-      for (j=0; j&lt;N; j++){
+      for (j=0; j<N; j++){
 	if(j != i){
 	  if (similarity[j]>bestSimi){
 	    indexBestSimi = j;
@@ -1166,7 +1166,7 @@ static int establish_hyperGraph() {
       }/* end for j */
       
       /* add a new edge to one of the two points */
-      if(i&lt;indexBestSimi){
+      if(i<indexBestSimi){
 	points[i].edges[points[i].length].pointNO = indexBestSimi;
 	points[i].edges[points[i].length].similarity = bestSimi;
 	points[i].length += 1;
@@ -1182,7 +1182,7 @@ static int establish_hyperGraph() {
 	 * other point.
 	 */
 	flag = 0;
-	for(l=0; l&lt;points[indexBestSimi].length; l++){
+	for(l=0; l<points[indexBestSimi].length; l++){
 	  if(points[indexBestSimi].edges[l].pointNO == i){
 	    flag = 1;
 	    break;
@@ -1211,17 +1211,17 @@ static int establish_hyperGraph() {
 #ifdef Debug_establish_hyperGraph
   j =0;
   printf("hyper edge for point %d is: \n", j);
-  for(i=0; i&lt;points[j].length; i++){
+  for(i=0; i<points[j].length; i++){
     printf("%d  %f \n", points[j].edges[i].pointNO,  points[j].edges[i].similarity);
   }/* end for */
   j = 36;
   printf("hyper edge for point %d is: \n", j);
-  for(i=0; i&lt;points[j].length; i++){
+  for(i=0; i<points[j].length; i++){
     printf("%d  %f \n", points[j].edges[i].pointNO,  points[j].edges[i].similarity);
   }/* end for */
   j = 49;
   printf("hyper edge for point %d is: \n", j);
-  for(i=0; i&lt;points[j].length; i++){
+  for(i=0; i<points[j].length; i++){
     printf("%d  %f \n", points[j].edges[i].pointNO,  points[j].edges[i].similarity);
   }/* end for */
 #endif 
@@ -1248,14 +1248,14 @@ static int initialize() {
 
   index_matlab = 0;
 
-  for(i=0; i&lt;MAXGROUPS; i++){
+  for(i=0; i<MAXGROUPS; i++){
     groups[i]=NULL;
     groupLength[i]=0;
   }
 
   /* this is the threshold of size of node to stop partition */
   threshold = (int)(N*MINSIZE);
-  if(threshold &lt; 1)
+  if(threshold < 1)
     {
       printf("threshold less than 1, error! \n");
       return -1;
@@ -1276,20 +1276,20 @@ static int initialize() {
       return -1;
     }
   /* for the root node, all the points belong to it */
-  for(i=0; i&lt;N; i++)
+  for(i=0; i<N; i++)
     {
       (root->points)[i]=i;
     }
 
 #ifdef Debug_initialize
-  for(i=0; i&lt;N; i++)
+  for(i=0; i<N; i++)
     {
       printf("(root->points)[%d]=%d \n", i, (root->points)[i]);
     }
 #endif
 
   /* initialize points */
-  for(i=0; i&lt;N; i++) 
+  for(i=0; i<N; i++) 
     {
       points[i].length = 0;
     }/* end for i */
@@ -1321,7 +1321,7 @@ static int readData() {
     }
 
   /* Now start reading data */
-  for (i=0; i&lt;N; i++)
+  for (i=0; i<N; i++)
     {
       fscanf(fp, "%f%f", &points[i].x, &points[i].y);
     }/* end for i */

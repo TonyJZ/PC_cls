@@ -32,6 +32,7 @@
     <ClInclude Include="..\..\include\segmentations\clustering_density_peaks.h" />
     <ClInclude Include="..\..\include\segmentations\DBSCAN.h" />
     <ClInclude Include="..\..\include\segmentations\duplicate_removing.h" />
+    <ClInclude Include="..\..\include\segmentations\facade_detection.h" />
     <ClInclude Include="..\..\include\segmentations\height_slicing.h" />
     <ClInclude Include="..\..\include\segmentations\model_fitting.h" />
     <ClInclude Include="..\..\include\segmentations\OPTICS.h" />

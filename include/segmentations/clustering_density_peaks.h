@@ -25,6 +25,8 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/common/geometry.h>
 
+#define UNLABELED 0
+
 
 typedef std::vector<int> NeighborIndices;  
 typedef std::map<int, NeighborIndices>  NeiborIndiceMap;
@@ -315,7 +317,7 @@ void getDistanceToHigherDensity(const pcl::PointCloud<PointT> &cloud, NeiborIndi
 
 
 template <typename PointT>
-int clustering_by_density_peaks(const pcl::PointCloud<PointT> &cloud, double neighborRadius, double alpha, double beta,
+int clustering_by_density_peaks_original(const pcl::PointCloud<PointT> &cloud, double neighborRadius, double dc, double k_percent,
 	std::vector<int> &cluster_center_idx, std::vector<uint32_t> &labels, std::vector<double> &rhosout)
 {
 	long start, end;
@@ -376,8 +378,8 @@ int clustering_by_density_peaks(const pcl::PointCloud<PointT> &cloud, double nei
 
 	/*  1. get cutoff param dc    */
 	// dc is crucial parameter for this algorithm
-//	double dc = getdc_original(cloud, &disMap, /*0.05*/alpha);
-	double dc = alpha;
+//	double dc = getdc_original(cloud, &disMap, /*0.05*/dc);
+//	double dc = dc;
 //	dc = 1.5;
 
 	std::vector<double> rhos; //density for each points
@@ -447,7 +449,7 @@ int clustering_by_density_peaks(const pcl::PointCloud<PointT> &cloud, double nei
 	std::sort(gamma_idx.begin(), gamma_idx.end(), descending_ValIndices);
 
 	//how to find peaks?
-	int nCluster = nSamples * beta/*0.1*/;
+	int nCluster = nSamples * k_percent/*0.1*/;
 
 	std::vector<int> candidates_peaks;
 	candidates_peaks.assign(gamma_idx.begin(),gamma_idx.begin()+nCluster);
@@ -594,5 +596,420 @@ int clustering_by_density_peaks(const pcl::PointCloud<PointT> &cloud, double nei
 	return 0;
 }
 
+// typedef struct node_s node_t;
+// struct node_s 
+// {
+// 	unsigned int index;
+// 	node_t *next;
+// };
+// 
+// 
+// 
+// struct epsilon_neighbours_s
+// {
+// 	unsigned int num_members;
+// 	node_t *head, *tail;
+// };
+// typedef struct epsilon_neighbours_s epsilon_neighbours_t;
 
+template <typename PointT>
+int spread(
+	int index,
+	const pcl::PointCloud<PointT> &cloud, 
+	pcl::KdTreeFLANN<PointT> *kdtree,
+	std::vector<int> &seeds,
+	unsigned int cluster_id,
+	double epsilon,
+	unsigned int minpts,
+	std::vector<uint32_t> &DBSCAN_labels)
+{
+	std::vector<int> ptIdxSearched;
+	std::vector<float> ptSqrDist;
+
+	int nn = kdtree->radiusSearch (cloud.points[index], epsilon, ptIdxSearched, ptSqrDist);
+	nn--; //eliminate pt
+
+	if (nn >= minpts) 
+	{
+		for(int i=1; i<ptIdxSearched.size(); i++)
+		{
+			if(DBSCAN_labels[ptIdxSearched[i]] == UNLABELED)
+			{
+				DBSCAN_labels[ptIdxSearched[i]] = cluster_id;
+				seeds.push_back(ptIdxSearched[i]);
+			}
+		}
+	}
+
+	return 0;
+}
+
+template <typename PointT>
+int expand(
+	int index,
+	const pcl::PointCloud<PointT> &cloud, 
+	pcl::KdTreeFLANN<PointT> *kdtree,
+	uint32_t cluster_id,
+	double epsilon,
+	unsigned int minpts,
+	std::vector<uint32_t> &DBSCAN_labels)
+{
+	std::vector<int> seeds;
+	
+	std::vector<int> ptIdxSearched;
+	std::vector<float> ptSqrDist;
+
+	int nn = kdtree->radiusSearch (cloud.points[index], epsilon, ptIdxSearched, ptSqrDist);
+	nn--; //eliminate pt
+	
+	if (nn < minpts)
+		DBSCAN_labels[index] = 0;
+	else 
+	{
+		DBSCAN_labels[index] = cluster_id;
+
+		for(int i=1; i<ptIdxSearched.size(); i++)
+		{
+			DBSCAN_labels[ptIdxSearched[i]] = cluster_id;
+
+			seeds.push_back(ptIdxSearched[i]);
+		}
+
+		for(int i=0; i<seeds.size(); i++) 
+		{
+			spread(seeds[i], cloud, kdtree, seeds, cluster_id, epsilon, minpts, DBSCAN_labels);
+		}
+	}
+
+	return 0;
+}
+
+template <typename PointT>
+int test_density_reachable(const pcl::PointCloud<PointT> &cloud, 
+	pcl::KdTreeFLANN<PointT> *kdtree,
+	std::vector<int> &cluster_center_idx, double dc, double minpts,
+	std::vector<uint32_t> &DBSCAN_labels)
+{
+	std::vector<int> combined_peak_idx;
+	int nSamples = cloud.points.size();
+
+	DBSCAN_labels.assign(nSamples, UNLABELED);
+	uint32_t cluster_id = 1;
+
+	for(int i=0; i<cluster_center_idx.size(); i++)
+	{
+		PointT pt = cloud.points[cluster_center_idx[i]];
+		
+		if(DBSCAN_labels[cluster_center_idx[i]]==UNLABELED)
+		{
+			combined_peak_idx.push_back(cluster_center_idx[i]);
+			expand(cluster_center_idx[i], cloud, kdtree, cluster_id, dc, minpts, DBSCAN_labels);
+
+			++cluster_id;
+		}
+		
+	}
+
+	cluster_center_idx = combined_peak_idx;
+
+	return cluster_center_idx.size();
+}
+
+//using reachability (DBSCAN)
+template <typename PointT>
+int clustering_by_density_peaks_modified(const pcl::PointCloud<PointT> &cloud, double neighborRadius, double dc, double k_percent, int minpts,
+	std::vector<int> &cluster_center_idx, std::vector<uint32_t> &labels, std::vector<double> &rhosout)
+{
+	long start, end;
+
+	int nSamples = cloud.points.size();
+
+	pcl::KdTreeFLANN<PointT>::Ptr kdtree (new pcl::KdTreeFLANN<PointT>);
+
+//	pcl::search::KdTree<PointT>::Ptr kdtree (new pcl::search::KdTree<PointT>);
+	kdtree->setInputCloud (cloud.makeShared());
+
+	NeiborIndiceMap  indices_map;
+	DistanceMap  disMap;
+
+	//find KNN neighbors for each point
+	int i=0;
+	for( pcl::PointCloud<PointT>::const_iterator iter = cloud.points.begin();
+		iter != cloud.points.end(); ++iter, i++)
+	{
+		std::vector<int> ptIdxSearched;
+		std::vector<float> ptSqrDist;
+		
+		NeighborIndices indices_nil;
+		indices_nil.clear();
+		if ( kdtree->radiusSearch (*iter, neighborRadius, ptIdxSearched, ptSqrDist) > 1 )
+		{//pointIdxRadiusSearch[0] is the search point 
+			NeighborIndices indices;
+
+			//NeighborIndices *indices = boost::shared_ptr<NeighborIndices> (new NeighborIndices);
+
+			indices.assign(ptIdxSearched.begin()+1, ptIdxSearched.end());
+
+			indices_map.insert(std::pair<int,NeighborIndices>(i,indices));
+
+			for (int j = 1; j < ptIdxSearched.size (); ++j)
+			{
+				//remove duplicate points previously
+				int neighIdx = ptIdxSearched[j];
+				PointpairIndice p_indice = std::make_pair(i, neighIdx);
+
+				if(i>neighIdx)
+				{//dis_ij == dis_ji; only record once
+					std::swap(p_indice.first, p_indice.second);
+				}
+
+				assert(sqrt(ptSqrDist[j])>1e-6);
+
+				disMap.insert(std::pair<PointpairIndice, double>(p_indice, sqrt(ptSqrDist[j])));
+			}
+		}
+		else
+		{
+			indices_map.insert(std::pair<int,NeighborIndices>(i,indices_nil));
+		}
+	}
+
+	start = clock();
+
+	/*  1. get cutoff param dc    */
+	// dc is crucial parameter for this algorithm
+//	double dc = getdc_original(cloud, &disMap, /*0.05*/dc);
+//	double dc = dc;
+//	dc = 1.5;
+
+	std::vector<double> rhos; //density for each points
+
+	/*    2. get local density        */
+	//getLocalDensity_cutoff(&indices_map, &disMap, dc, rhos);
+	getLocalDensity_gaussian(&indices_map, &disMap, dc, rhos);
+	
+
+	/*    3. get margin distance      */
+	std::vector<int> rho_indices;
+	rho_indices.resize(cloud.points.size());
+	for(int i=0; i<cloud.points.size(); ++i)
+		rho_indices[i] = i;
+
+	pVals = &rhos;
+	std::sort(rho_indices.begin(), rho_indices.end(), descending_ValIndices);   //descending the rho indices
+
+	std::vector<double> deltas;  //minimum distance for local density peaks 
+	std::vector<int> nneigh;     //the indice of the peak which has the minimum distance to current point
+	std::vector<bool> peak_flags; //local peak flag
+
+	getDistanceToHigherDensity(cloud, &indices_map, &disMap, rhos, rho_indices, deltas, nneigh, peak_flags);
+
+// 	int getDistanceToHigherDensity(const pcl::PointCloud<PointT> &cloud, std::vector<double> &rhos, 
+// 		std::vector<int> &rho_indices, std::vector<double> &deltas, std::vector<int> &nneigh)
+
+	/* 4. search peaks  */
+	std::vector<int> delta_indices;
+	delta_indices.resize(cloud.points.size());
+	for(int i=0; i<cloud.points.size(); ++i)
+		delta_indices[i] = i;
+
+	pVals = &deltas;
+	std::sort(delta_indices.begin(), delta_indices.end(), descending_ValIndices);   //descending the rho indices
+
+	std::vector<double> gamma;   //gamma = rho*delta
+	gamma.assign(nSamples, 0);
+
+	double max_gamma = std::numeric_limits<double>::min();
+	double min_gamma = std::numeric_limits<double>::max();
+	for(int i=0; i<nSamples; ++i)
+	{
+		gamma[i] = rhos[i]*deltas[i];
+		
+		if(max_gamma<gamma[i])	max_gamma = gamma[i];
+		if(min_gamma>gamma[i])	min_gamma = gamma[i];
+	}
+
+	max_gamma += 1e-6;
+	min_gamma -= 1e-6;
+	double dinterval = max_gamma - min_gamma;
+	for(int i=0; i<nSamples; i++)
+	{//normalized  
+		gamma[i] = (gamma[i]-min_gamma)/dinterval;
+	}
+
+
+	std::vector<int> gamma_idx;
+	gamma_idx.assign(nSamples, 0);
+	for(int i=0; i<nSamples; i++)
+	{
+		gamma_idx[i] = i;
+	}
+
+	pVals = &gamma;
+	std::sort(gamma_idx.begin(), gamma_idx.end(), descending_ValIndices);
+
+	//how to find peaks?
+	int nCluster = nSamples * k_percent/*0.1*/;
+
+	std::vector<int> candidates_peaks;
+	candidates_peaks.assign(gamma_idx.begin(),gamma_idx.begin()+nCluster);
+
+	//check wheather the candidates are local peaks
+	//cluster center must be the local peaks
+	for(int i=0; i<nCluster; i++)
+	{
+//		if(peak_flags[candidates_peaks[i]])
+		
+		if(peak_flags[candidates_peaks[i]])
+			cluster_center_idx.push_back(candidates_peaks[i]);
+		else
+		{
+			//try to merge the peaks in a short distance
+			//this is most probably caused by a large cut-off distance 'dc' 
+			if(deltas[candidates_peaks[i]] > dc)
+			{
+				cluster_center_idx.push_back(candidates_peaks[i]);
+				peak_flags[candidates_peaks[i]] = true;
+			}
+			else
+			{
+				if(!peak_flags[nneigh[candidates_peaks[i]]])
+				{//the merge peak is not a cluster center yet
+					;
+				}
+			}
+		}
+	}
+	nCluster = cluster_center_idx.size();
+
+	/* note: modified DBC  combine the N-density-reachable peaks   */
+
+	std::vector<uint32_t>  db_labels;
+	std::vector<int> merged_peak_idx;
+	merged_peak_idx = cluster_center_idx;
+	/*nCluster = */test_density_reachable(cloud, kdtree.get(), merged_peak_idx, dc, minpts, db_labels);
+
+	
+//	cluster_center_idx.assign(candidates_peaks.begin(), candidates_peaks.end());
+
+	/* 5. label points      */
+	labels.assign(nSamples, UNLABELED);   // 0 for unlabeling point 
+
+	uint32_t la = 1;
+	for(int i=0; i<nCluster; i++, la++)
+	{//label cluster center first
+		if(labels[cluster_center_idx[i]] == UNLABELED)
+			labels[cluster_center_idx[i]] = db_labels[cluster_center_idx[i]];
+	}
+
+	for(int i=0; i<nSamples; i++)
+	{// Note: descending label the rest points (non-peaks)
+		if(labels[rho_indices[i]] == 0 && /*nneigh[rho_indices[i]]>=0*/!peak_flags[rho_indices[i]])
+		{
+			if(labels[nneigh[rho_indices[i]]] == 0)
+			{
+//				std::cout<<"outlier: "<<labels[rho_indices[i]]<<std::endl;
+				continue;
+			}
+
+			//if(deltas[rho_indices[i]] < dc)
+				labels[rho_indices[i]] = labels[nneigh[rho_indices[i]]]; //label as the nearest peak
+			//assert(labels[nneigh[rho_indices[i]]] !=0 );
+		}
+	}
+
+#ifdef _DEBUG
+//	rhosout = rhos;
+	rhosout.resize(rhos.size());
+	for(int i=0; i<rhosout.size(); i++)
+	{
+		rhosout[i] = nneigh[i];
+	}
+
+	labels = db_labels;
+	goto FUNC_END;
+#endif
+
+	// detect outliers
+// 	std::vector<int> halos; // 0: core; 1: halo
+// 	halos.assign(nSamples, 0);
+	{
+
+	
+	std::vector<double> rhos_ub; //calculate the local density upper bound for each cluster
+	rhos_ub.assign(nCluster+1, 0);  //rhos_ub[0] reserved; cluster ID is from 1 to n
+
+/*	for(int i=0; i<nSamples; i++)
+	{
+		if(labels[i]==0)
+			continue;
+
+		if(peak_flags[i]) //cluster center is reserved
+			continue;
+
+		std::vector<int> ptIdxSearched;
+		std::vector<float> ptSqrDist;
+		PointT searchPt = cloud.points[i];
+
+		if ( kdtree->radiusSearch (searchPt, neighborRadius, ptIdxSearched, ptSqrDist) > 1 )
+		{
+			for (int j = 1; j < ptIdxSearched.size (); ++j)
+			{
+				int neighIdx = ptIdxSearched[j];
+				if(labels[neighIdx]==0)
+					continue;
+
+				if(labels[i] != labels[neighIdx])
+				{//boundary point 
+					PointpairIndice pair_indice(i, neighIdx);
+					if(i>neighIdx)
+					{
+						std::swap(pair_indice.first, pair_indice.second);
+					}
+
+					double dis = disMap.find(pair_indice)->second;
+
+					if(dis < dc) //dc or other cut-off parameter
+					{//this is a boundary point 
+						double rho_aver = 0.5*(rhos[i] + rhos[neighIdx]);
+
+// 						std::cout<<"i,j: "
+// 							<<"("<<i<<", "<<neighIdx<<") "
+// 							<<"labels: "
+// 							<<"("<<labels[i]<<", "<<labels[neighIdx]<<") "
+// 							<<"rho: "
+// 							<<"("<<rhos[i]<<", "<<rhos[neighIdx]<<") "
+// 							<<std::endl;
+
+						//update cluster bound
+						if(rho_aver > rhos_ub[labels[i]]) rhos_ub[labels[i]] = rho_aver;
+						if(rho_aver > rhos_ub[labels[neighIdx]]) rhos_ub[labels[neighIdx]] = rho_aver;
+					}
+				}
+			}
+		}
+	}*/
+
+	//mark the halo points 
+// 	for(int i=0; i<nSamples; i++)
+// 	{
+// 		if(labels[i] == 0) 
+// 			continue;
+// 
+// 		if(peak_flags[i]) //cluster center is reserved
+// 			continue;
+// 
+// 		if(rhos[i] < rhos_ub[labels[i]])
+// 			labels[i] = 0; //out of average bound
+// 	}
+
+	}
+	/////////////////////////////////////////////////////////////
+FUNC_END:
+	end = clock();
+
+	std::cout<<"used time: "<<((double)(end - start)) / CLOCKS_PER_SEC<<std::endl;
+
+	return 0;
+}
 #endif
