@@ -5,10 +5,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/octree/octree.h>
 
-typedef std::vector<int> PointIndices; 
+typedef std::vector<int> myPointIndices; 
 
 template <typename PointT>
-int height_slicing(const pcl::PointCloud<PointT> &cloud, double h_interval, std::vector<PointIndices> &slice_indices)
+int height_slicing(const pcl::PointCloud<PointT> &cloud, double h_interval, std::vector<myPointIndices> &slice_indices)
 {
 	float resolution = 5.0f;
 
@@ -66,8 +66,6 @@ int height_slicing(const pcl::PointCloud<PointT> &cloud, double h_interval, std:
 
 	return 0;
 }
-
-
 
 
 

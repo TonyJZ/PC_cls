@@ -34,7 +34,7 @@ typedef NeiborIndiceMap::iterator  it_NeighMap;
 
 typedef std::pair<int, int> PointpairIndice;
 typedef std::map<PointpairIndice, double>  DistanceMap;
-typedef std::map<std::pair<int, int>, double>::iterator it_DistMap;
+typedef std::map<PointpairIndice, double>::iterator it_DistMap;
 
 // pcl::geometry::distance();
 
@@ -52,7 +52,7 @@ bool ascending_ValIndices(int idx1, int idx2)
 
 //get cut-off distance
 //dc = df(M*percent)
-template <typename PointT>
+/*template <typename PointT>
 double getdc_original(const pcl::PointCloud<PointT> &cloud, DistanceMap *pDistMap, double percent=0.02)
 {
 	std::vector<double> p2p_dis;  //all point-to-point distance (points with neighbor constraint)
@@ -129,7 +129,7 @@ double getdc_original(const pcl::PointCloud<PointT> &cloud, DistanceMap *pDistMa
 	neigh_flags.clear();
 
 	return dc;
-}
+}*/
 
 
 //cutoff kernel

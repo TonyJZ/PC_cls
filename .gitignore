@@ -64,3 +64,12 @@ Temporary Items
 *.ipch
 *.res
 *.opensdf
+
+# directories
+bin/
+Bin/
+lib/
+Lib/
+build/
+Build/
+zip/

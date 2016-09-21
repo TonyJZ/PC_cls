@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <pcl/common/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -18,7 +19,6 @@
 #include "segmentations/duplicate_removing.h"
 #include "segmentations/clustering_density_peaks.h"
 #include "segmentations/height_slicing.h"
-
 
 //#define PCL_
 
@@ -483,7 +483,7 @@ int segment_whole_pointcloud(char *pInputName, double neighborRadius, double dc,
 	if(out_cloud->points.size()>0)
 		pcl::toROSMsg(*out_cloud, *outCloud2);	
 
-	//		las_writer.write (sCenterName, *outCloud2);
+	las_writer.write (sCenterName, *outCloud2);
 
 
 	out_cloud->height = unique_cloud->height;
@@ -537,7 +537,7 @@ int segment_slicing_pointcloud(char *pInputName, double slice_interval, double n
 
 
 	std::vector<uint32_t> global_labels;     //labels for the whole scene
-	std::vector<PointIndices> slice_indices;
+	std::vector<myPointIndices> slice_indices;
 	
 	
 	height_slicing(*unique_cloud, slice_interval, slice_indices);
@@ -548,7 +548,7 @@ int segment_slicing_pointcloud(char *pInputName, double slice_interval, double n
 
 
 	int islice = 0;
-	for(std::vector<PointIndices>::iterator itIndices=slice_indices.begin(); itIndices!=slice_indices.end(); ++itIndices, ++islice)
+	for(std::vector<myPointIndices>::iterator itIndices=slice_indices.begin(); itIndices!=slice_indices.end(); ++itIndices, ++islice)
 	{
 		pcl::PointIndicesPtr sIdx (new pcl::PointIndices);
 		sIdx->indices = *itIndices;
@@ -650,17 +650,226 @@ int segment_slicing_pointcloud(char *pInputName, double slice_interval, double n
 	return 0;
 }
 
+#include "feature_extract/StatisticalOutlierRemoval.h"
+int outlier_removing(char *pInputName, int k_nn, float mulThresh, char *pOutputName)
+{
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+
+	lasreader.read(pInputName,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_x = boost::math::iround(incloud->points[0].x);
+	double offset_y = boost::math::iround( incloud->points[0].y);
+	double offset_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_x) < 10000) offset_x = 0;
+	if(fabs(offset_y) < 10000) offset_y = 0;
+	if(fabs(offset_z) < 10000) offset_z = 0;
+
+
+	std::vector<int> filterd_indices;
+	std::vector<uint32_t> slabels;	//labels for current slice points 
+	std::vector<double> rhos;
+
+	//extract features 
+	pcl::PointCloud<pcl::PointXYZ>::Ptr features(new pcl::PointCloud<pcl::PointXYZ>);
+	features->width = incloud->width;
+	features->height = incloud->height;
+
+	for(int k=0; k < incloud->points.size(); k++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[k].x - offset_x;
+		pt.y = incloud->points[k].y - offset_y;
+		pt.z = incloud->points[k].z - offset_z;
+
+		features->points.push_back(pt);
+	}
+
+	pcl_StatisticalOutlierRemoval (*features, k_nn, mulThresh, filterd_indices, true);
+
+	
+	//cluster center
+	pcl::PointIndicesPtr removed_indices (new pcl::PointIndices);
+	removed_indices->indices = filterd_indices;
+
+	pcl::PointCloud<MyLasPoint>::Ptr removed_pts (new pcl::PointCloud<MyLasPoint>);
+	pcl::ExtractIndices<MyLasPoint> extract;
+	extract.setInputCloud (incloud);
+	extract.setIndices (removed_indices);
+	extract.filter (*removed_pts);
+
+	//output 
+	pcl::LASWriter las_writer;
+	pcl::PCLPointCloud2::Ptr outCloud2(new pcl::PCLPointCloud2);
+//	pcl::PointCloud<MyLasPoint>::Ptr out_cloud(new pcl::PointCloud<MyLasPoint>);
+
+// 	out_cloud->height = removed_pts->height;
+// 	out_cloud->width = removed_pts->width;
+// 	out_cloud->points.resize(removed_pts->points.size());
+// 
+	for(int i=0; i<filterd_indices.size(); i++)
+	{
+		incloud->points[filterd_indices[i]].classification = 18;
+
+		//unique_cloud->points[i].label = labels[i];
+	}
+
+	if(removed_pts->points.size()>0)
+		pcl::toROSMsg(*incloud, *outCloud2);	
+
+	las_writer.write (pOutputName, *outCloud2);
+
+	return 0;
+}
+
+#include "alignment/pointcloud_register.h"
+#include "feature_extract/edge_detection.h"
+int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_params *params)
+{
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+
+	lasreader.read(pRefName,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_ref_x = boost::math::iround(incloud->points[0].x);
+	double offset_ref_y = boost::math::iround( incloud->points[0].y);
+	double offset_ref_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_ref_x) < 10000) offset_ref_x = 0;
+	if(fabs(offset_ref_y) < 10000) offset_ref_y = 0;
+	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
+
+
+	//ref pointcloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr ref_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
+	ref_coords3D->width = incloud->width;
+	ref_coords3D->height = incloud->height;
+
+	for(int k=0; k < incloud->points.size(); k++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[k].x - offset_ref_x;
+		pt.y = incloud->points[k].y - offset_ref_y;
+		pt.z = incloud->points[k].z - offset_ref_z;
+
+		ref_coords3D->points.push_back(pt);
+	}
+
+
+	lasreader.read(pOrgName,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	//ref pointcloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr org_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
+	org_coords3D->width = incloud->width;
+	org_coords3D->height = incloud->height;
+
+	for(int k=0; k < incloud->points.size(); k++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[k].x - offset_ref_x; //use the same offset
+		pt.y = incloud->points[k].y - offset_ref_y;
+		pt.z = incloud->points[k].z - offset_ref_z;
+
+		org_coords3D->points.push_back(pt);
+	}
+
+	//calculate the projection densities
+	pcl::PointCloud<pcl::PointXYZ> grid_cloud;
+	std::vector<pcl::PointIndices> label_indices;
+	edge_detect_by_density(*ref_coords3D, 1.0, 3.0, grid_cloud, label_indices);
+
+	pcl::PCLPointCloud2::Ptr cloud_all(new pcl::PCLPointCloud2);
+//	pcl::PointCloud<MyLasPoint>::Ptr cloud_all (new pcl::PointCloud<MyLasPoint>);
+	for(int i=0; i<label_indices.size(); i++)
+	{
+		pcl::PointCloud<pcl::PointXYZ>::Ptr removed_pts (new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::copyPointCloud (grid_cloud, label_indices[i].indices, *removed_pts);
+
+		pcl::PointCloud<MyLasPoint>::Ptr mylas_cloud (new pcl::PointCloud<MyLasPoint>);
+
+// 		mylas_cloud->width = removed_pts->width;
+// 		mylas_cloud->height = removed_pts->height;
+// 		mylas_cloud->points.resize(removed_pts->points.size());
+		float suppresionTh = 3.0;
+		for(int j=0; j<removed_pts->points.size(); j++)
+		{
+ 			if(removed_pts->points[i].z < suppresionTh)
+ 				continue;
+
+			MyLasPoint pt;
+			pt.classification = i+1;
+			pt.x = removed_pts->points[j].x + offset_ref_x;
+			pt.y = removed_pts->points[j].y + offset_ref_y;
+			pt.z = removed_pts->points[j].z;
+			pt.intensity = removed_pts->points[j].z;
+			//unique_cloud->points[i].label = labels[i];
+
+			mylas_cloud->points.push_back(pt);
+		}
+
+		mylas_cloud->width = mylas_cloud->points.size();
+		mylas_cloud->height = 1;
+
+		pcl::PCLPointCloud2::Ptr cloud(new pcl::PCLPointCloud2);
+		if(mylas_cloud->points.size()>0)
+		{
+			pcl::toROSMsg(*mylas_cloud, *cloud);
+			pcl::concatenatePointCloud (*cloud_all, *cloud, *cloud_all);
+		}
+	}
+
+	//output 
+	pcl::LASWriter las_writer;
+
+	las_writer.write ("G:/temp/test_edge.las", *cloud_all);
+
+	return 0;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
-
+//      eliminate facade points
 //  	remove_facadePoints("G:/pointcloud/Dundas_University/CSF_fitered/off-ground points.las", 1.0, 25,
 // 		"G:/pointcloud/Dundas_University/CSF_fitered/off-ground points_nonfacade.las");
 //  	return 0;
 
-	segment_whole_pointcloud("G:/pointcloud/Dundas_University/CSF_fitered/off-ground points_nonfacade.las",
-		10.0, 4.0, 0.05, 10, "G:/pointcloud/Dundas_University/CSF_fitered/off-ground points_nonfacade_segWhole.las");
+//  using AP to segment whole pointcloud
+// 	segment_whole_pointcloud("G:/temp/test1.las",
+// 		10.0, 4.0, 0.05, 10, "G:/temp/test1_segwhole.las");
+// 	return 0;
 
+//  using pcl statistical outlier removal method, it is not work  
+// 	outlier_removing("G:/pointcloud/Dundas_University/ALTM_Strip_Dundas.las", 25, 1.5,
+// 		"G:/pointcloud/Dundas_University/ALTM_Strip_Dundas_removalOutliers.las");
+// 	return 0;
+
+	Transform_params params;
+	regist_airbore_mobile_pointcloud("G:/temp/test2.las", "G:/temp/test2.las", &params);
 	return 0;
+
 
 	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
 	pcl::LASReader lasreader;
@@ -691,7 +900,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 
 	std::vector<uint32_t> global_labels;     //labels for the whole scene
-	std::vector<PointIndices> slice_indices;
+	std::vector<myPointIndices> slice_indices;
 //	height_slicing(*unique_cloud, 3.0, slice_indices);
 
 	pcl::PointCloud<MyLasPoint>::Ptr slice_points (new pcl::PointCloud<MyLasPoint>);
@@ -699,7 +908,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	
 	//Sep 9th, test no slicing
-	PointIndices idx;
+	myPointIndices idx;
 	for(int i=0; i<unique_cloud->points.size(); i++)
 	{
 		idx.push_back(i);
@@ -709,7 +918,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 
 	int islice = 0;
-	for(std::vector<PointIndices>::iterator itIndices=slice_indices.begin(); itIndices!=slice_indices.end(); ++itIndices, ++islice)
+	for(std::vector<myPointIndices>::iterator itIndices=slice_indices.begin(); itIndices!=slice_indices.end(); ++itIndices, ++islice)
 	{
 		pcl::PointIndicesPtr sIdx (new pcl::PointIndices);
 		sIdx->indices = *itIndices;
