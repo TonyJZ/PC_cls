@@ -22,7 +22,6 @@
     <None Include="..\..\src\test_presegmentation\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test_presegmentation\model_fitting.cpp" />
     <ClCompile Include="..\..\src\test_presegmentation\PCL_Segmentations.cpp" />
     <ClCompile Include="..\..\src\test_presegmentation\stdafx.cpp" />
     <ClCompile Include="..\..\src\test_presegmentation\test_presegmentation.cpp" />
@@ -30,17 +29,20 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\alignment\pointcloud_register.h" />
     <ClInclude Include="..\..\include\feature_extract\edge_detection.h" />
-    <ClInclude Include="..\..\include\feature_extract\line_detection.h" />
+    <ClInclude Include="..\..\include\feature_extract\geometry_detection_by_Jlinkage.h" />
     <ClInclude Include="..\..\include\feature_extract\StatisticalOutlierRemoval.h" />
+    <ClInclude Include="..\..\include\geometry\geo_element.h" />
+    <ClInclude Include="..\..\include\geometry\model_fitting.h" />
     <ClInclude Include="..\..\include\segmentations\CHAMELEON.h" />
     <ClInclude Include="..\..\include\segmentations\clustering_density_peaks.h" />
     <ClInclude Include="..\..\include\segmentations\DBSCAN.h" />
     <ClInclude Include="..\..\include\segmentations\duplicate_removing.h" />
     <ClInclude Include="..\..\include\segmentations\facade_detection.h" />
     <ClInclude Include="..\..\include\segmentations\height_slicing.h" />
-    <ClInclude Include="..\..\include\segmentations\model_fitting.h" />
     <ClInclude Include="..\..\include\segmentations\OPTICS.h" />
     <ClInclude Include="..\..\include\segmentations\PCL_Segmentations.h" />
+    <ClInclude Include="..\..\include\utilities\updator.h" />
+    <ClInclude Include="..\..\include\utilities\uti_forJlinkage.h" />
     <ClInclude Include="..\..\src\test_presegmentation\stdafx.h" />
     <ClInclude Include="..\..\src\test_presegmentation\targetver.h" />
   </ItemGroup>
@@ -96,7 +98,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>f:\debug</OutDir>
-    <IncludePath>D:\pcl-1.8.0\io\include;D:\pcl-1.8.0\common\include;D:\pcl-1.8.0\filters\include;D:\pcl-1.8.0\segmentation\include;D:\pcl-1.8.0\octree\include;D:\Eigen\include;D:\Boost\boost_1_61_0;F:\pcl-1.8.0\vs2010\include;D:\pcl-1.8.0\search\include;F:\PC_cls\include;D:\pcl-1.8.0\kdtree\include\;D:\flann\include;D:\pcl-1.8.0\features\include;D:\pcl-1.8.0\sample_consensus\include;D:\pcl-1.8.0\2d\include;$(IncludePath)</IncludePath>
+    <IncludePath>D:\pcl-1.8.0\io\include;D:\pcl-1.8.0\common\include;D:\pcl-1.8.0\filters\include;D:\pcl-1.8.0\segmentation\include;D:\pcl-1.8.0\octree\include;D:\Eigen\include;D:\Boost\boost_1_61_0;F:\pcl-1.8.0\vs2010\include;D:\pcl-1.8.0\search\include;F:\PC_cls\include;D:\pcl-1.8.0\kdtree\include\;D:\flann\include;D:\pcl-1.8.0\features\include;D:\pcl-1.8.0\sample_consensus\include;D:\pcl-1.8.0\2d\include;F:\PC_cls\3rdparty;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -130,7 +132,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>D:\Boost\lib\x64\lib;F:\pcl-1.8.0\vs2010\lib;F:\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;pcl_segmentation_debug.lib;pcl_visualization_debug.lib;pcl_features_debug.lib;pcl_filters_debug.lib;pcl_search_debug.lib;pcl_octree_debug.lib;pcl_sample_consensus_debug.lib;pcl_ml_debug.lib;pcl_kdtree_debug.lib;D:\FLANN\lib\flann_cpp_s-gd.lib;pcl_io_debug.lib;pcl_common_debug.lib;pcl_io_ply_debug.lib;libboost_system-vc100-mt-gd-1_61.lib;libboost_filesystem-vc100-mt-gd-1_61.lib;libboost_thread-vc100-mt-gd-1_61.lib;libboost_date_time-vc100-mt-gd-1_61.lib;libboost_iostreams-vc100-mt-gd-1_61.lib;libboost_chrono-vc100-mt-gd-1_61.lib;delayimp.lib;D:\OpenNI2\Lib\OpenNI2.lib;d:\OpenNI\Lib64\openNI64.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGenericFiltering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGeovis-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkproj4-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkCharts-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkViews-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkInfovis-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkWidgets-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkVolumeRendering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkHybrid-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkRendering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkImaging-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGraphics-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkverdict-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkIO-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkFiltering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkCommon-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkDICOMParser-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkNetCDF_cxx-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkmetaio-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtksys-gd.lib;ws2_32.lib;comctl32.lib;wsock32.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtksqlite-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkpng-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtktiff-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkjpeg-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkexpat-gd.lib;vfw32.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkexoIIc-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkNetCDF-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtklibxml2-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkzlib-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkalglib-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkftgl-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkfreetype-gd.lib;d:\Qt\4.8.0\lib\QtGuid4.lib;d:\Qt\4.8.0\lib\QtSqld4.lib;d:\Qt\4.8.0\lib\QtCored4.lib;glu32.lib;opengl32.lib;pcl_lasD.lib;feature_extractD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;pcl_segmentation_debug.lib;pcl_visualization_debug.lib;pcl_features_debug.lib;pcl_filters_debug.lib;pcl_search_debug.lib;pcl_octree_debug.lib;pcl_sample_consensus_debug.lib;pcl_ml_debug.lib;pcl_kdtree_debug.lib;D:\FLANN\lib\flann_cpp_s-gd.lib;pcl_io_debug.lib;pcl_common_debug.lib;pcl_io_ply_debug.lib;libboost_system-vc100-mt-gd-1_61.lib;libboost_filesystem-vc100-mt-gd-1_61.lib;libboost_thread-vc100-mt-gd-1_61.lib;libboost_date_time-vc100-mt-gd-1_61.lib;libboost_iostreams-vc100-mt-gd-1_61.lib;libboost_chrono-vc100-mt-gd-1_61.lib;delayimp.lib;D:\OpenNI2\Lib\OpenNI2.lib;d:\OpenNI\Lib64\openNI64.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGenericFiltering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGeovis-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkproj4-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkCharts-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkViews-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkInfovis-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkWidgets-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkVolumeRendering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkHybrid-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkRendering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkImaging-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkGraphics-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkverdict-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkIO-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkFiltering-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkCommon-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkDICOMParser-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkNetCDF_cxx-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkmetaio-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtksys-gd.lib;ws2_32.lib;comctl32.lib;wsock32.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtksqlite-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkpng-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtktiff-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkjpeg-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkexpat-gd.lib;vfw32.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkexoIIc-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkNetCDF-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtklibxml2-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkzlib-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkalglib-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkftgl-gd.lib;d:\VTK 5.8.0\lib\vtk-5.8\vtkfreetype-gd.lib;d:\Qt\4.8.0\lib\QtGuid4.lib;d:\Qt\4.8.0\lib\QtSqld4.lib;d:\Qt\4.8.0\lib\QtCored4.lib;glu32.lib;opengl32.lib;pcl_lasD.lib;feature_extractD.lib;F:\PC_cls\3rdparty\Lib\x64\jLinkage_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

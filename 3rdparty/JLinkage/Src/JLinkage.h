@@ -29,6 +29,7 @@ typedef bm::bvector<bm::standard_allocator, bm::miniset<bm::block_allocator, bm:
 
 // Store data points information
 struct sPtLnk{
+	unsigned int ptID;		//add by Tony Sep 23th, 2016
 	std::vector<float>  *mCoord;
 	bvect mPreferenceSet;
 	sClLnk *mBelongingCluster;

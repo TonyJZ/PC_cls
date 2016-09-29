@@ -17,8 +17,9 @@ int edge_detect_by_density(pcl::PointCloud<PointT> &cloud, float gridsize, float
 	//suppress low density points
 	for(int i=0; i<grid_cloud.points.size(); i++)
 	{
-		if(grid_cloud.points[i].z < suppresionTh)
-			grid_cloud.points[i].z = 0;
+		//会影响canny提取的结果
+// 		if(grid_cloud.points[i].z < suppresionTh)
+// 			grid_cloud.points[i].z = 0;
 	}
 
 	pcl::PointCloud<MyLasPoint>::Ptr mylas_cloud (new pcl::PointCloud<MyLasPoint>);
