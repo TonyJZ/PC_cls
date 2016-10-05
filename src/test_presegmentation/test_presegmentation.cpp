@@ -738,12 +738,14 @@ bool comp(std::vector<int> left, std::vector<int> right)
 	return left.size() > right.size();
 }
 
+#include <pcl/features/normal_3d.h>
 #include "alignment/pointcloud_register.h"
 #include "feature_extract/edge_detection.h"
 #include "feature_extract/geometry_detection_by_jlinkage.h"
 #include "geometry/model_fitting.h"
 #include "geometry/geo_element.h"
-int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_params *params)
+
+int regist_airbore_mobile_pointcloud(char *pAirName, char *pMobName, Eigen::Matrix4f &trans_param, double &orgScore, double &fitScore)
 {
 	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
 	pcl::LASReader lasreader;
@@ -753,7 +755,7 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
 
 
-	lasreader.read(pRefName,
+	lasreader.read(pAirName,
 		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
 
 	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
@@ -767,32 +769,67 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
 
 
-	//ref pointcloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr ref_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
-	ref_coords3D->width = incloud->width;
-	ref_coords3D->height = incloud->height;
-
-	for(int k=0; k < incloud->points.size(); k++)
+	pcl::PointCloud<pcl::PointXYZ>::Ptr air_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
+	std::vector<int> sel_indices;
+	pcl::PointCloud<pcl::PointXYZ> air_sel_pts;
+	int blockSize = 200000;
+	float f_num = incloud->points.size();
+	int nBlocks = std::ceil(f_num/blockSize);
+	
+	//sub-block processing
+	for(int iBlock=0; iBlock < nBlocks; iBlock++)
 	{
-		pcl::PointXYZ pt;
+		int curBlockSize=blockSize;
+		if(iBlock*blockSize + curBlockSize > incloud->points.size())
+			curBlockSize = incloud->points.size()-iBlock*blockSize;
+		
+		air_coords3D->points.clear();
+		for(int i=0; i<curBlockSize; i++)
+		{
+			pcl::PointXYZ pt;
 
-		pt.x = incloud->points[k].x - offset_ref_x;
-		pt.y = incloud->points[k].y - offset_ref_y;
-		pt.z = incloud->points[k].z - offset_ref_z;
+			pt.x = incloud->points[iBlock*blockSize+i].x - offset_ref_x;
+			pt.y = incloud->points[iBlock*blockSize+i].y - offset_ref_y;
+			pt.z = incloud->points[iBlock*blockSize+i].z - offset_ref_z;
 
-		ref_coords3D->points.push_back(pt);
+			air_coords3D->points.push_back(pt);
+		}
+		air_coords3D->width = curBlockSize;
+		air_coords3D->height = 1;
+
+		std::vector<float> densities;
+		estimate_ProjectionDensity_XYPlane_gaussian(*air_coords3D, 0.5, densities);
+
+		//only reserve high density points
+		
+		float ref_denTh = 5.0;
+		sel_indices.clear();
+		for(int i=0; i<densities.size(); i++)
+		{
+			if(densities[i] > ref_denTh)
+				sel_indices.push_back(i);
+		}
+		
+		//pcl::copyPointCloud (*air_coords3D, sel_indices, air_sel_pts);
+
+		for(int j=0; j<sel_indices.size(); j++)
+		{
+			air_sel_pts.push_back(air_coords3D->points[sel_indices[j]]);
+		}
 	}
 
+	air_sel_pts.width = air_sel_pts.points.size();
+	air_sel_pts.height = 1;
 
-	lasreader.read(pOrgName,
+	lasreader.read(pMobName,
 		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
 
 	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
 
 	//ref pointcloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr org_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
-	org_coords3D->width = incloud->width;
-	org_coords3D->height = incloud->height;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr mob_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
+	mob_coords3D->width = incloud->width;
+	mob_coords3D->height = incloud->height;
 
 	for(int k=0; k < incloud->points.size(); k++)
 	{
@@ -802,7 +839,7 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 		pt.y = incloud->points[k].y - offset_ref_y;
 		pt.z = incloud->points[k].z - offset_ref_z;
 
-		org_coords3D->points.push_back(pt);
+		mob_coords3D->points.push_back(pt);
 	}
 
 	//calculate the projection densities
@@ -810,40 +847,111 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 	//std::vector<pcl::PointIndices> label_indices;
 
 //	edge_detect_by_density(*ref_coords3D, 1.0, 3.0, grid_cloud, label_indices);
-	std::vector<float> densities;
-	estimate_ProjectionDensity_XYPlane_gaussian(*ref_coords3D, 0.5, densities);
-
-	//only reserve high density points
-	std::vector<int> sel_indices;
-	float ref_denTh = 5.0;
-	for(int i=0; i<densities.size(); i++)
-	{
-		if(densities[i] > ref_denTh)
-			sel_indices.push_back(i);
-	}
-	pcl::PointCloud<pcl::PointXYZ> ref_sel_pts;
-	pcl::copyPointCloud (*ref_coords3D, sel_indices, ref_sel_pts);
 
 
-	estimate_ProjectionDensity_XYPlane_gaussian(*org_coords3D, 0.5, densities);
-	float org_denTh = 300.0;
+
+	//mobile point cloud contains high noises, need preprocess carefully
+	pcl::search::Search<pcl::PointXYZ>::Ptr tree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZ> > (new pcl::search::KdTree<pcl::PointXYZ>);
+	pcl::PointCloud <pcl::Normal>::Ptr normals_mob (new pcl::PointCloud <pcl::Normal>);
+	pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> normal_estimator;
+	normal_estimator.setSearchMethod (tree);
+	normal_estimator.setInputCloud (/*org_sel_pts.makeShared()*/mob_coords3D);
+	normal_estimator.setKSearch (15);
+	normal_estimator.compute (*normals_mob);
+
+	const double pi = 3.1415926535897932384626433832795;
+	float cosine_threshold = std::cosf (pi*85.0/180.0);
+	float ver[3];
+	ver[0] = 0; ver[1] = 0; ver[2] = 1;
+	Eigen::Map<Eigen::Vector3f> initial_normal (static_cast<float*> (ver));
 	sel_indices.clear();
-	for(int i=0; i<densities.size(); i++)
+	for(int i=0; i<normals_mob->points.size(); i++)
 	{
-		if(densities[i] > org_denTh)
+		Eigen::Map<Eigen::Vector3f> nghbr_normal (static_cast<float*> (normals_mob->points[i].normal));
+		float dot_product = fabsf (nghbr_normal.dot (initial_normal));
+		if (dot_product < cosine_threshold && mob_coords3D->points[i].z > 62.0)
+		{
 			sel_indices.push_back(i);
+		}
 	}
-	pcl::PointCloud<pcl::PointXYZ> org_sel_pts;
-	pcl::copyPointCloud (*org_coords3D, sel_indices, org_sel_pts);
+
+	pcl::PointCloud<pcl::PointXYZ> mob_norm_sel_pts;
+	//org_sel_pts.points.clear();
+	pcl::copyPointCloud (*mob_coords3D, sel_indices, mob_norm_sel_pts);
+
+// 	estimate_ProjectionDensity_XYPlane_gaussian(org_norm_sel_pts, 0.5, densities);
+// 	float org_denTh = 40.0;
+// 	sel_indices.clear();
+// 	for(int i=0; i<densities.size(); i++)
+// 	{
+// 		if(densities[i] > org_denTh)
+// 			sel_indices.push_back(i);
+// 	}
+// 
+// 	pcl::PointCloud<pcl::PointXYZ> org_dens_sel_pts;
+// 	pcl::copyPointCloud (org_norm_sel_pts, sel_indices, org_dens_sel_pts);
 
 
 
+	//filter the corresponding points 
+	pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+	pcl::PointIndicesPtr s_idx (new pcl::PointIndices);
+	s_idx->indices = sel_indices;
+	kdtree.setInputCloud (mob_norm_sel_pts.makeShared());
+
+	pcl::PointCloud <pcl::Normal>::Ptr normals_air (new pcl::PointCloud <pcl::Normal>);
+
+	normal_estimator.setSearchMethod (tree);
+	normal_estimator.setInputCloud (/*org_sel_pts.makeShared()*/air_sel_pts.makeShared());
+	normal_estimator.setKSearch (15);
+	normal_estimator.compute (*normals_air);
+
+	sel_indices.clear();
+	double dis2_th = 1;
+	orgScore = 0;
+	for(int i=0; i<air_sel_pts.points.size(); i++)
+	{
+		std::vector<int> p_indices;
+		std::vector<float> sqr_distances;
+		
+		kdtree.nearestKSearch(air_sel_pts.points[i], 1, p_indices, sqr_distances);
+
+		if(sqr_distances[0] < dis2_th)
+		{
+			sel_indices.push_back(i);
+			orgScore += sqr_distances[0];
+		}
+	}
+
+	orgScore = sqrt(orgScore/sel_indices.size());
+
+	pcl::PointCloud<pcl::PointXYZ> air_filter_pts;
+	//org_sel_pts.points.clear();
+	pcl::copyPointCloud (air_sel_pts, sel_indices, air_filter_pts);
+	
+
+	write_LAS("G:/temp/test_whole_cor_air.las", air_filter_pts, offset_ref_x, offset_ref_y, offset_ref_z);
+	write_LAS("G:/temp/test_whole_cor_mob.las", mob_norm_sel_pts, offset_ref_x, offset_ref_y, offset_ref_z);
+
+	pcl::PointCloud<pcl::PointXYZ> final_cloud;
+	
+	
+	simple_ICP (air_filter_pts, mob_norm_sel_pts, final_cloud, trans_param, fitScore);
+
+
+
+
+
+	pcl::PointCloud<pcl::PointXYZ> result_cloud;
+	pcl::transformPointCloud (*air_coords3D, result_cloud, trans_param);
+
+/*
 	std::vector<std::vector<int>> clusters;
-	geometry_detect_by_JLinkage(sel_pts, clusters, 3, 0.2);
+	geometry_detect_by_JLinkage(ref_sel_pts, clusters, 3, 0.2);
 
 	std::sort(clusters.begin(), clusters.end(), comp);
 
-/*	int tinyPlane = 20;
+	int tinyPlane = 20;
 	std::vector<P_CLS::GeoElem>  geoPlanes;
 	for(int i=0; i<clusters.size(); ++i)
 	{
@@ -862,7 +970,7 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 
 		geoPlanes.push_back(_plane);
 	}
-	*/
+	
 
 
 
@@ -887,7 +995,7 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 			las_cloud->points.push_back(pt);
 		}
 		cID++;
-	}
+	}*/
 
 // 	for(int i=0; i<ref_coords3D->points.size(); i++)
 // 	{
@@ -902,6 +1010,20 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 //  			las_cloud->points.push_back(pt);
 // 	}
 
+	pcl::PointCloud<MyLasPoint>::Ptr las_cloud (new pcl::PointCloud<MyLasPoint>);
+	for(int i=0; i<result_cloud.points.size(); i++)
+	{
+ 			MyLasPoint pt;
+ 			//pt.classification = cID;
+ 			pt.x = result_cloud.points[i].x + offset_ref_x;
+ 			pt.y = result_cloud.points[i].y + offset_ref_y;
+ 			pt.z = result_cloud.points[i].z + offset_ref_z;
+ 			//pt.intensity = densities[i];
+ 			//unique_cloud->points[i].label = labels[i];
+ 
+ 			las_cloud->points.push_back(pt);
+	}
+
 	las_cloud->width = las_cloud->points.size();
 	las_cloud->height = 1;
 
@@ -913,7 +1035,7 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 
 	pcl::LASWriter las_writer;
 
-	las_writer.write ("G:/temp/test_edge_Jlinkage.las", *cloud);
+	las_writer.write ("G:/temp/align_whole.las", *cloud);
 
 	return 0;
 
@@ -968,6 +1090,79 @@ int regist_airbore_mobile_pointcloud(char *pRefName, char *pOrgName, Transform_p
 	return 0;*/
 }
 
+int rectify_pointcloud(char *pOriFile, char *pDstName, Eigen::Matrix4f *params)
+{
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+
+	lasreader.read(pOriFile,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_ref_x = boost::math::iround(incloud->points[0].x);
+	double offset_ref_y = boost::math::iround( incloud->points[0].y);
+	double offset_ref_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_ref_x) < 10000) offset_ref_x = 0;
+	if(fabs(offset_ref_y) < 10000) offset_ref_y = 0;
+	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
+
+
+	//ref pointcloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr ori_coords3D(new pcl::PointCloud<pcl::PointXYZ>);
+	ori_coords3D->width = incloud->width;
+	ori_coords3D->height = incloud->height;
+
+	for(int k=0; k < incloud->points.size(); k++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[k].x - offset_ref_x;
+		pt.y = incloud->points[k].y - offset_ref_y;
+		pt.z = incloud->points[k].z - offset_ref_z;
+
+		ori_coords3D->points.push_back(pt);
+	}
+
+	pcl::PointCloud<pcl::PointXYZ> result_cloud;
+	pcl::transformPointCloud (*ori_coords3D, result_cloud, *params);
+
+	pcl::PointCloud<MyLasPoint>::Ptr las_cloud (new pcl::PointCloud<MyLasPoint>);
+	for(int i=0; i<result_cloud.points.size(); i++)
+	{
+		MyLasPoint pt;
+		//pt.classification = cID;
+		pt.x = result_cloud.points[i].x + offset_ref_x;
+		pt.y = result_cloud.points[i].y + offset_ref_y;
+		pt.z = result_cloud.points[i].z + offset_ref_z;
+		//pt.intensity = densities[i];
+		//unique_cloud->points[i].label = labels[i];
+
+		las_cloud->points.push_back(pt);
+	}
+
+	las_cloud->width = las_cloud->points.size();
+	las_cloud->height = 1;
+
+	pcl::PCLPointCloud2::Ptr cloud(new pcl::PCLPointCloud2);
+	if(las_cloud->points.size()>0)
+	{
+		pcl::toROSMsg(*las_cloud, *cloud);
+	}
+
+	pcl::LASWriter las_writer;
+
+	las_writer.write (pDstName, *cloud);
+
+	return 0;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 //      eliminate facade points
@@ -985,8 +1180,17 @@ int _tmain(int argc, _TCHAR* argv[])
 // 		"G:/pointcloud/Dundas_University/ALTM_Strip_Dundas_removalOutliers.las");
 // 	return 0;
 
-	Transform_params params;
-	regist_airbore_mobile_pointcloud("G:/temp/test2_airborne.las", "G:/temp/test2_airborne.las", &params);
+	P_CLS::Transform_params params;
+	Eigen::Matrix4f trans_param; 
+	double orgScore, fitScore;
+
+	regist_airbore_mobile_pointcloud("G:/pointcloud/Dundas_University/ALTM_Strip_Dundas.las",
+		"G:/pointcloud/Dundas_University/LYNX_Strip_Dundas.las", trans_param, orgScore,fitScore);
+
+
+
+	rectify_pointcloud("G:/pointcloud/Dundas_University/ALTM_Strip_Dundas.las", 
+		"G:/pointcloud/Dundas_University/ALTM_Strip_Dundas_rectified.las", &trans_param);
 	return 0;
 
 

@@ -45,6 +45,8 @@ int estimate_ProjectionDensity_XYPlane(pcl::PointCloud<PointT> &cloud, float rad
 template <typename PointT>
 int estimate_ProjectionDensity_XYPlane_gaussian(pcl::PointCloud<PointT> &cloud, float radius, std::vector<float> &densities)
 {
+	densities.clear();
+
 	pcl::PointCloud<pcl::PointXY>::Ptr cloud2D(new pcl::PointCloud<pcl::PointXY>);
 	copyPointCloud(cloud, *cloud2D);
 

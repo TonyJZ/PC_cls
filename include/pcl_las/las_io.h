@@ -10,6 +10,8 @@
 
 #include <pcl/pcl_exports.h>
 #include <pcl/io/file_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 
 struct EIGEN_ALIGN16 MyLasPoint              //定义点类型结构
@@ -122,5 +124,8 @@ class PCL_EXPORTS LASReader : public FileReader {
   };
 
 }
+
+int PCL_EXPORTS write_LAS(char *pFileName, pcl::PointCloud<pcl::PointXYZ> cloud, 
+	double xOffset, double yOffset, double zOffset);
 
 #endif /* LAS_IO_H_ */

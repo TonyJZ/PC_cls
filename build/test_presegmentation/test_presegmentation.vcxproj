@@ -98,7 +98,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>f:\debug</OutDir>
-    <IncludePath>D:\pcl-1.8.0\io\include;D:\pcl-1.8.0\common\include;D:\pcl-1.8.0\filters\include;D:\pcl-1.8.0\segmentation\include;D:\pcl-1.8.0\octree\include;D:\Eigen\include;D:\Boost\boost_1_61_0;F:\pcl-1.8.0\vs2010\include;D:\pcl-1.8.0\search\include;F:\PC_cls\include;D:\pcl-1.8.0\kdtree\include\;D:\flann\include;D:\pcl-1.8.0\features\include;D:\pcl-1.8.0\sample_consensus\include;D:\pcl-1.8.0\2d\include;F:\PC_cls\3rdparty;$(IncludePath)</IncludePath>
+    <IncludePath>D:\pcl-1.8.0\io\include;D:\pcl-1.8.0\common\include;D:\pcl-1.8.0\filters\include;D:\pcl-1.8.0\segmentation\include;D:\pcl-1.8.0\octree\include;D:\Eigen\include;D:\Boost\boost_1_61_0;F:\pcl-1.8.0\vs2010\include;D:\pcl-1.8.0\search\include;F:\PC_cls\include;D:\pcl-1.8.0\kdtree\include\;D:\flann\include;D:\pcl-1.8.0\features\include;D:\pcl-1.8.0\sample_consensus\include;D:\pcl-1.8.0\2d\include;F:\PC_cls\3rdparty;D:\pcl-1.8.0\registration\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

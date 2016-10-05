@@ -1,21 +1,46 @@
 #ifndef _Point_Cloud_Register_H_Tony_Sep_15_2016_
 #define _Point_Cloud_Register_H_Tony_Sep_15_2016_
 
-enum Trans_Type
+#include <iostream>
+#include <pcl/point_types.h>
+#include <pcl/registration/icp.h>
+
+namespace P_CLS 
 {
-	Non_Trans = 0,
-	Rigid2D = 1,
-	Rigid3D = 2
-};
+	enum Trans_Type
+	{
+		Non_Trans = 0,
+		Rigid2D = 1,
+		Rigid3D = 2
+	};
 
 
-typedef struct  
+	typedef struct  
+	{
+		Trans_Type type;
+		double coeffs[32];
+
+	}Transform_params;
+
+}
+
+
+
+template <typename PointT>
+int simple_ICP (pcl::PointCloud<PointT> &org_cloud, pcl::PointCloud<PointT> &tar_cloud, pcl::PointCloud<PointT> &final_cloud,
+	Eigen::Matrix4f &trans_param, double &fitScore)
 {
-	Trans_Type type;
-	double coeffs[32];
+	pcl::IterativeClosestPoint<PointT, PointT> icp;
+	icp.setInputCloud(org_cloud.makeShared());
+	icp.setInputTarget(tar_cloud.makeShared());
+	icp.align(final_cloud);
+	
+	fitScore = icp.getFitnessScore();
+	
+	trans_param = icp.getFinalTransformation();
 
-}Transform_params;
-
+	return (0);
+}
 
 
 
