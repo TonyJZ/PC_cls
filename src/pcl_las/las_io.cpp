@@ -291,34 +291,3 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 	return 0;
 }
 
-#include <pcl/ros/conversions.h>
-int write_LAS(char *pFileName, pcl::PointCloud<pcl::PointXYZ> cloud, 
-	double xOffset, double yOffset, double zOffset)
-{
-	pcl::PointCloud<MyLasPoint>::Ptr las_cloud (new pcl::PointCloud<MyLasPoint>);
-	for(int i=0; i<cloud.points.size(); i++)
-	{
-		MyLasPoint pt;
-		//pt.classification = cID;
-		pt.x = cloud.points[i].x + xOffset;
-		pt.y = cloud.points[i].y + yOffset;
-		pt.z = cloud.points[i].z + zOffset;
-		//pt.intensity = densities[i];
-		//unique_cloud->points[i].label = labels[i];
-
-		las_cloud->points.push_back(pt);
-	}
-
-	las_cloud->width = las_cloud->points.size();
-	las_cloud->height = 1;
-
-	pcl::PCLPointCloud2::Ptr cloud2(new pcl::PCLPointCloud2);
-	if(las_cloud->points.size()>0)
-	{
-		pcl::toROSMsg(*las_cloud, *cloud2);
-	}
-
-	pcl::LASWriter las_writer;
-
-	return las_writer.write (pFileName, *cloud2);
-}
