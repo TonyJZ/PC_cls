@@ -22,7 +22,6 @@
     <None Include="..\..\src\test_presegmentation\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\test_presegmentation\PCL_Segmentations.cpp" />
     <ClCompile Include="..\..\src\test_presegmentation\stdafx.cpp" />
     <ClCompile Include="..\..\src\test_presegmentation\test_presegmentation.cpp" />
   </ItemGroup>
@@ -46,6 +45,7 @@
     <ClInclude Include="..\..\include\utilities\uti_forJlinkage.h" />
     <ClInclude Include="..\..\src\test_presegmentation\stdafx.h" />
     <ClInclude Include="..\..\src\test_presegmentation\targetver.h" />
+    <ClInclude Include="..\..\src\test_presegmentation\wrapped_applications.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DDAABDDD-4C25-4B61-B65E-80EB13523304}</ProjectGuid>
