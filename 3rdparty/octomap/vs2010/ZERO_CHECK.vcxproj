@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{2590C4AB-F1FA-32B8-AA66-1046082FAF6C}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ZERO_CHECK</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+    <PropertyGroup>
+      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="CMakeFiles\43b5b62371e9afc8f14110ef81d68f54\generate.stamp.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:/PC_cls/3rdparty/octomap/vs2010/CMakeFiles/43b5b62371e9afc8f14110ef81d68f54/generate.stamp.rule;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePushCheckState.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckCXXSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindQt4.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\MacroAddFileDependencies.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4ConfigDependentSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4Macros.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\dynamicEDT3DConfig.cmake.in;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\examples\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config-version.cmake;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\math\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\testing\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\FindQGLViewer.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\math\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\testing\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octovis\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\examples\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:/PC_cls/3rdparty/octomap/vs2010/CMakeFiles/43b5b62371e9afc8f14110ef81d68f54/generate.stamp.rule;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePushCheckState.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckCXXSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindQt4.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\MacroAddFileDependencies.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4ConfigDependentSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4Macros.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\dynamicEDT3DConfig.cmake.in;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\examples\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config-version.cmake;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\math\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\testing\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\FindQGLViewer.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\math\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\testing\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octovis\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\examples\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:/PC_cls/3rdparty/octomap/vs2010/CMakeFiles/43b5b62371e9afc8f14110ef81d68f54/generate.stamp.rule;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePushCheckState.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckCXXSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindQt4.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\MacroAddFileDependencies.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4ConfigDependentSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4Macros.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\dynamicEDT3DConfig.cmake.in;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\examples\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config-version.cmake;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\math\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\testing\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\FindQGLViewer.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\math\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\testing\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octovis\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\examples\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Checking Build System</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "$(SolutionPath)"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:/PC_cls/3rdparty/octomap/vs2010/CMakeFiles/43b5b62371e9afc8f14110ef81d68f54/generate.stamp.rule;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePushCheckState.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckCXXSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CheckSymbolExists.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindQt4.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\MacroAddFileDependencies.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4ConfigDependentSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\Qt4Macros.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\dynamicEDT3DConfig.cmake.in;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\dynamicEDT3D\src\examples\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config-version.cmake;F:\PC_cls\3rdparty\octomap\lib\cmake\octomap\octomap-config.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\src\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\math\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\src\testing\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octovis\CMakeModules\FindQGLViewer.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\3.6.1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:\PC_cls\3rdparty\octomap\vs2010\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\math\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octomap\src\testing\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\octovis\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\CMakeFiles\generate.stamp;F:\PC_cls\3rdparty\octomap\vs2010\dynamicEDT3D\src\examples\CMakeFiles\generate.stamp</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

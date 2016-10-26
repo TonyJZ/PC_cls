@@ -460,9 +460,163 @@ int points_registering(char *pOrgFile, char *pRefFile, char *pRectifiedFile)
 }
 
 
+int merge_overlap_points(char *pOrgFile, char *pRefFile, float radius, char *pMergedFile)
+{
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+	std::vector<double> ref_times, org_times;
+	std::vector<uint16_t> ref_intensities, org_intensities;
 
 
+	lasreader.read(pOrgFile,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
 
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_ref_x = boost::math::iround( incloud->points[0].x);
+	double offset_ref_y = boost::math::iround( incloud->points[0].y);
+	double offset_ref_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_ref_x) < 10000) offset_ref_x = 0;
+	if(fabs(offset_ref_y) < 10000) offset_ref_y = 0;
+	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr org_pts(new pcl::PointCloud<pcl::PointXYZ>);
+	org_pts->width = incloud->width;
+	org_pts->height = incloud->height;
+
+	for(int i=0; i<incloud->points.size(); i++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[i].x - offset_ref_x;
+		pt.y = incloud->points[i].y - offset_ref_y;
+		pt.z = incloud->points[i].z - offset_ref_z;
+
+		org_pts->points.push_back(pt);
+		org_times.push_back(incloud->points[i].gpstime);
+		org_intensities.push_back(incloud->points[i].intensity);
+	}
+
+	lasreader.read(pRefFile,
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr ref_pts(new pcl::PointCloud<pcl::PointXYZ>);
+	ref_pts->width = incloud->width;
+	ref_pts->height = incloud->height;
+
+	for(int i=0; i<incloud->points.size(); i++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[i].x - offset_ref_x;
+		pt.y = incloud->points[i].y - offset_ref_y;
+		pt.z = incloud->points[i].z - offset_ref_z;
+
+		ref_pts->points.push_back(pt);
+		ref_times.push_back(incloud->points[i].gpstime);
+		ref_intensities.push_back(incloud->points[i].intensity);
+	}
+
+	std::vector<int> clip_indices;
+	overlap_clipping(*ref_pts, *org_pts, radius, clip_indices);
+
+// 	pcl::PointCloud<pcl::PointXYZ>::Ptr overlap_pts(new pcl::PointCloud<pcl::PointXYZ>);
+// 	pcl::copyPointCloud (*org_pts, clip_indices, *overlap_pts);
+
+
+	pcl::PointCloud<MyLasPoint>::Ptr merged_cloud (new pcl::PointCloud<MyLasPoint>);
+	for(int i=0; i<ref_pts->points.size(); i++)
+	{
+		MyLasPoint pt;
+		//pt.classification = cID;
+		pt.x = ref_pts->points[i].x + offset_ref_x;
+		pt.y = ref_pts->points[i].y + offset_ref_y;
+		pt.z = ref_pts->points[i].z + offset_ref_z;
+		pt.intensity = ref_intensities[i];
+		pt.gpstime = ref_times[i];
+		//unique_cloud->points[i].label = labels[i];
+
+		merged_cloud->points.push_back(pt);
+	}
+
+	for(int i=0; i<clip_indices.size(); i++)
+	{
+		MyLasPoint pt;
+		//pt.classification = cID;
+		pt.x = org_pts->points[clip_indices[i]].x + offset_ref_x;
+		pt.y = org_pts->points[clip_indices[i]].y + offset_ref_y;
+		pt.z = org_pts->points[clip_indices[i]].z + offset_ref_z;
+		pt.intensity = org_intensities[clip_indices[i]];
+		pt.gpstime = org_times[clip_indices[i]];
+		//unique_cloud->points[i].label = labels[i];
+
+		merged_cloud->points.push_back(pt);
+	}
+
+	merged_cloud->width = merged_cloud->points.size();
+	merged_cloud->height = 1;
+
+	pcl::PCLPointCloud2::Ptr cloud(new pcl::PCLPointCloud2);
+	if(merged_cloud->points.size()>0)
+	{
+		pcl::toROSMsg(*merged_cloud, *cloud);
+	}
+
+	pcl::LASWriter las_writer;
+
+	las_writer.write (pMergedFile, *cloud);
+
+	return 0;
+}
+
+#include "segmentations/urban_partition.h"
+void test_output_voxel_model()
+{
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+	lasreader.read("G:/temp/test3_airborne.las",
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_ref_x = boost::math::iround( incloud->points[0].x);
+	double offset_ref_y = boost::math::iround( incloud->points[0].y);
+	double offset_ref_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_ref_x) < 10000) offset_ref_x = 0;
+	if(fabs(offset_ref_y) < 10000) offset_ref_y = 0;
+	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr org_pts(new pcl::PointCloud<pcl::PointXYZ>);
+	org_pts->width = incloud->width;
+	org_pts->height = incloud->height;
+
+	for(int i=0; i<incloud->points.size(); i++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[i].x - offset_ref_x;
+		pt.y = incloud->points[i].y - offset_ref_y;
+		pt.z = incloud->points[i].z - offset_ref_z;
+
+		org_pts->points.push_back(pt);
+	}
+
+	output_voxel_model(*org_pts, 2.0, "G:/temp/test3_airborne_2_voxel.ply");
+}
 
 
 

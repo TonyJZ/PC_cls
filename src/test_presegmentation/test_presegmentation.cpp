@@ -742,6 +742,11 @@ bool comp(std::vector<int> left, std::vector<int> right)
 }
 
 #include "wrapped_applications.h"
+
+// #include <pcl/io/vtk_lib_io.h>
+// #include <pcl/visualization/cloud_viewer.h>
+#include "segmentations/urban_partition.h"
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 //      eliminate facade points
@@ -759,8 +764,13 @@ int _tmain(int argc, _TCHAR* argv[])
 // 		"G:/pointcloud/Dundas_University/ALTM_Strip_Dundas_removalOutliers.las");
 // 	return 0;
 
+// 	merge_overlap_points("G:/pointcloud/Dundas_University/ALTM_Strip_Dundas_rectified.las", 
+// 		"G:/pointcloud/Dundas_University/LYNX_Strip_Dundas.las", 1.0, 
+// 		"G:/pointcloud/Dundas_University/merged.las");
+// 	return 0;
 
-
+	test_output_voxel_model();
+	return 0;
 
 	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
 	pcl::LASReader lasreader;

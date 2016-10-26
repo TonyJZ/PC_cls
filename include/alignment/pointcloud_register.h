@@ -214,7 +214,7 @@ pcl::CorrespondencesPtr Customized_ICP (pcl::PointCloud<PointT> &org_cloud, pcl:
 
 	trans_param = icp.getFinalTransformation();
 
-
+#undef Scalar
 
 	return icp.getCorrespondencesPtr();
 }

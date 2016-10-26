@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{83BC9571-A2A2-34E1-A7AF-D036A3050D0A}</ProjectGUID>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+    <PropertyGroup>
+      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>F:\PC_cls\3rdparty\octomap\octomap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>F:\PC_cls\3rdparty\octomap\octomap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>F:\PC_cls\3rdparty\octomap\octomap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>F:\PC_cls\3rdparty\octomap\octomap\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\octomap\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-file F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-file F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-file F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"D:\Program Files\CMake\bin\cmake.exe" -HF:/PC_cls/3rdparty/octomap -BF:/PC_cls/3rdparty/octomap/vs2010 --check-stamp-file F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:/PC_cls/3rdparty/octomap/octomap/CMakeLists.txt;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;D:\Program Files\CMake\share\cmake-3.6\Modules\CTest.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestUseLaunchers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CTestTargets.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\DartConfiguration.tcl.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CompilerSettings.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CMakeUninstall.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakePackageConfigHelpers.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\WriteBasicConfigVersionFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\octomap-config.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Modules\BasicConfigVersion-AnyNewerVersion.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\InstallPkgConfigFile.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindDoxygen.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\PC_cls\3rdparty\octomap\octomap\CMakeModules\CPackSettings.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPack.cmake;D:\Program Files\CMake\share\cmake-3.6\Modules\CPackComponent.cmake;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;D:\Program Files\CMake\share\cmake-3.6\Templates\CPackConfig.cmake.in;F:\PC_cls\3rdparty\octomap\octomap\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:\PC_cls\3rdparty\octomap\vs2010\octomap\CMakeFiles\generate.stamp</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/ZERO_CHECK.vcxproj">
+      <Project>2590C4AB-F1FA-32B8-AA66-1046082FAF6C</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/binvox2bt.vcxproj">
+      <Project>E6B2DAF0-4D51-34AD-832D-AFE7B06DF9B4</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/bt2vrml.vcxproj">
+      <Project>3ACAAFB1-C17F-3201-93A0-E9CFBA62A381</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/color_tree_histogram.vcxproj">
+      <Project>AD7A18EC-1437-3BDA-A374-A06C1E32A4E3</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/compare_octrees.vcxproj">
+      <Project>29D2533E-BC7A-34EC-AAFD-530295E3AF91</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/convert_octree.vcxproj">
+      <Project>1D15DB99-3640-378A-B075-50406C5ED871</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/edit_octree.vcxproj">
+      <Project>347C6161-05B5-32F6-B351-78B21F4D1230</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/eval_octree_accuracy.vcxproj">
+      <Project>5CC986A1-7DB5-3B40-9FCA-CF5F410EF248</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/graph2tree.vcxproj">
+      <Project>A1267362-DC5E-30CD-838B-D6E47AC217FC</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/intersection_example.vcxproj">
+      <Project>00D53E06-38CC-3635-B734-B51C3A56E465</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/log2graph.vcxproj">
+      <Project>D74CEAB6-3AF7-3F49-8101-C063EC3FB9F4</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/normals_example.vcxproj">
+      <Project>61652124-B40B-3856-909E-B443F14C900C</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/octomap.vcxproj">
+      <Project>F79A9620-AFCB-3BAC-A2CB-BE25E7E0EA40</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/octomap-static.vcxproj">
+      <Project>01109B3D-42D9-30F5-A7A0-FFADCE035CEB</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/math/octomath.vcxproj">
+      <Project>C7A1424D-938B-3E68-A9F4-AE19813A3FC5</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/math/octomath-static.vcxproj">
+      <Project>41511976-1864-3E11-98EF-1534F446613A</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/octree2pointcloud.vcxproj">
+      <Project>1CA38989-FE68-3B48-8DFE-156E091314F8</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/simple_example.vcxproj">
+      <Project>9B7B933D-CEAC-3D85-9602-12CACF1C9078</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_changedkeys.vcxproj">
+      <Project>F577A420-9E94-3FB7-8491-CB87427D3AA6</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_color_tree.vcxproj">
+      <Project>7608BC04-E90A-3422-B3A1-E34C85704A23</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_io.vcxproj">
+      <Project>91745070-D054-3F2E-81E2-EC5CC9B3D4CE</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_iterators.vcxproj">
+      <Project>4EBD341B-E1D7-3270-902D-110C939F29AE</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_mapcollection.vcxproj">
+      <Project>57469E5E-EC8C-3A31-93B0-736AD0B5B530</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_pruning.vcxproj">
+      <Project>F7E29DDA-25F7-39BE-8863-1AB3B7CC21AD</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_raycasting.vcxproj">
+      <Project>74DC922A-68BA-3FA8-8752-71EEAAC6F395</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/test_scans.vcxproj">
+      <Project>C3AFB2C2-FFE3-3241-AC62-85D9134CCE12</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/PC_cls/3rdparty/octomap/vs2010/octomap/src/testing/unit_tests.vcxproj">
+      <Project>147CE0E9-028F-3C92-9C3F-C19099421EEB</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
