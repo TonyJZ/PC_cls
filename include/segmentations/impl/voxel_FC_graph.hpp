@@ -107,84 +107,6 @@ m_Octree.defineBoundingBox (min_x_arg, min_y_arg, min_z_arg,
 max_x_arg, max_y_arg, max_z_arg);
 }*/
 
-template<typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
-	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::mark_voxels()
-{
-	boost::shared_ptr<VoxelContainerPointIndices> nullVoxel(new VoxelContainerPointIndices);
-	nullVoxel->occupyFlag = null_voxel;
-
-	for(int iz=m_vNumZ-1; iz>=0; --iz)
-	{
-		for(int ix=0; ix<m_vNumX; ++ix)
-		{
-			for(int iy=0; iy<m_vNumY; ++iy)
-			{
-				pcl::octree::OctreeKey	key_arg;
-				key_arg.x = ix; key_arg.y = iy; key_arg.z = iz;
-
-				if(iz > m_boundMark(ix, iy))
-				{//null voxel
-					m_voxelMap.insert(std::make_pair(key_arg, nullVoxel.get()));
-				}
-				else if(iz == m_boundMark(ix, iy))
-				{//occupied
-					;
-				}
-				else
-				{
-					VoxelMap::iterator it_voxel, it_father;
-					it_voxel=m_voxelMap.find(key_arg);
-					it_father = m_voxelMap.find(pcl::octree::OctreeKey(ix, iy, m_boundMark(ix, iy)));
-					assert(it_father != m_voxelMap.end());
-
-					if(it_voxel != m_voxelMap.end())
-					{//occupied voxel
-						it_voxel->second->occupyFlag = occupied_voxel | inner_voxel;
-						it_voxel->second->fatherptr = it_father->second;
-
-						//update the top voxel
-						m_boundMark(ix, iy) = iz;
-					}
-					else
-					{
-						boost::shared_ptr<VoxelContainerPointIndices> innerVoxel(new VoxelContainerPointIndices);
-						innerVoxel->occupyFlag = inner_voxel;
-						innerVoxel->fatherptr = it_voxel->second;
-
-						m_voxelMap.insert(std::make_pair(key_arg, innerVoxel.get()));
-					}
-				}
-			}
-		}
-	}
-
-}
-
-template<typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
-	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::labels_clear()
-{
-	VoxelMap::iterator it_voxel;
-	for(it_voxel=m_voxelMap.begin(); it_voxel != m_voxelMap.end(); ++it_voxel)
-	{
-		it_voxel->second->label = -1;
-	}
-}
-
-
-template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
-	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::compute_FC_Voxels ()
-{
-	if (!initCompute ())
-	{
-		//graph = GraphT ();
-		deinitCompute ();
-		return;
-	}
-
-	voxel_partition();
-	mark_voxels();
-}
-
 template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
 	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::voxel_partition ()
 {
@@ -249,6 +171,7 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 	// with calculated idx. Points with the same idx value will contribute to the
 	// same point of resulting CloudPoint
 	std::vector<VoxelCell>::iterator vIter = vNeighbourhood_.begin();
+	num_of_occupied_ = 0;
 	for (std::vector<int>::const_iterator it = indices_->begin (); it != indices_->end (); ++it)
 	{
 		if (!input_->is_dense)
@@ -277,10 +200,12 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 			newVoxel->occupyFlag = occupied_voxel;
 			newVoxel->addPointIndex(*it);
 
-			m_voxelMap.insert(std::make_pair(key_arg, newVoxel.get()));
+			//m_voxelMap.insert(std::make_pair(key_arg, newVoxel.get()));
 
 			(vIter+vId)->voxel_type = occupied_voxel;
-			(vIter+vId)->voxel_att = newVoxel;
+			(vIter+vId)->voxel_att = newVoxel.get();
+
+			num_of_occupied_++;
 		}
 		else
 		{
@@ -306,6 +231,123 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 
 }
 
+template<typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
+	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::mark_voxels()
+{
+// 	boost::shared_ptr<VoxelContainerPointIndices> nullVoxel(new VoxelContainerPointIndices);
+// 	nullVoxel->occupyFlag = null_voxel;
+
+	int vlayerNum = m_vNumX * m_vNumY;
+
+	num_of_null_ = 0;
+	num_of_inner_ = 0;
+	std::vector<VoxelCell>::iterator vIter = vNeighbourhood_.begin();
+	for(int iz=m_vNumZ-1; iz>=0; --iz)
+	{
+		for(int ix=0; ix<m_vNumX; ++ix)
+		{
+			for(int iy=0; iy<m_vNumY; ++iy)
+			{
+				pcl::octree::OctreeKey	key_arg;
+				key_arg.x = ix; key_arg.y = iy; key_arg.z = iz;
+
+				int vId = iz*vlayerNum + iy*m_vNumX + ix;
+
+				(vIter+vId)->key_arg = key_arg;
+
+				if(iz > m_boundMark(ix, iy))
+				{//null voxel
+					//m_voxelMap.insert(std::make_pair(key_arg, nullVoxel.get()));
+					(vIter+vId)->voxel_type = null_voxel;
+					(vIter+vId)->voxel_att = NULL;
+
+					num_of_null_++;
+				}
+				else if(iz == m_boundMark(ix, iy))
+				{//occupied
+					;
+				}
+				else
+				{
+					int vFId = m_boundMark(ix, iy)*vlayerNum + iy*m_vNumX + ix;
+
+					if((vIter+vId)->voxel_type == occupied_voxel)
+					{
+						(vIter+vId)->voxel_type |= inner_voxel;
+						//(vIter+vId)->voxel_att->occupyFlag = occupied_voxel | inner_voxel;
+						(vIter+vId)->father = (vIter+vFId)->voxel_att;
+
+						m_boundMark(ix, iy) = iz;
+						num_of_inner_++;
+					}
+					else
+					{
+						(vIter+vId)->voxel_type = inner_voxel;
+						(vIter+vId)->voxel_att = NULL;
+						(vIter+vId)->father = (vIter+vFId)->voxel_att;
+
+						num_of_inner_++;
+
+// 						boost::shared_ptr<VoxelContainerPointIndices> innerVoxel(new VoxelContainerPointIndices);
+// 						innerVoxel->occupyFlag = inner_voxel;
+// 						innerVoxel->fatherptr = it_voxel->second;
+					}
+
+// 					VoxelMap::iterator it_voxel, it_father;
+// 					it_voxel=m_voxelMap.find(key_arg);
+// 					it_father = m_voxelMap.find(pcl::octree::OctreeKey(ix, iy, m_boundMark(ix, iy)));
+// 					assert(it_father != m_voxelMap.end());
+// 
+// 					if(it_voxel != m_voxelMap.end())
+// 					{//occupied voxel
+// 						it_voxel->second->occupyFlag = occupied_voxel | inner_voxel;
+// 						it_voxel->second->fatherptr = it_father->second;
+// 
+// 						//update the top voxel
+// 						m_boundMark(ix, iy) = iz;
+// 					}
+// 					else
+// 					{
+// 						boost::shared_ptr<VoxelContainerPointIndices> innerVoxel(new VoxelContainerPointIndices);
+// 						innerVoxel->occupyFlag = inner_voxel;
+// 						innerVoxel->fatherptr = it_voxel->second;
+// 
+// 						m_voxelMap.insert(std::make_pair(key_arg, innerVoxel.get()));
+// 					}
+				}
+			}
+		}
+	}
+
+}
+
+template<typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
+	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::labels_clear()
+{
+// 	VoxelMap::iterator it_voxel;
+// 	for(it_voxel=m_voxelMap.begin(); it_voxel != m_voxelMap.end(); ++it_voxel)
+// 	{
+// 		it_voxel->second->label = -1;
+// 	}
+}
+
+
+template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
+	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::compute_FC_Voxels ()
+{
+	if (!initCompute ())
+	{
+		//graph = GraphT ();
+		deinitCompute ();
+		return;
+	}
+
+	voxel_partition();
+	mark_voxels();
+}
+
+
+
 template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT, typename OctreeT*/> void
 	pcl::UrbanRec::VoxelFCGraph<PointT/*, VoxelContainerT, BranchContainerT, OctreeT*/>::voxel_features_extraction()
 {
@@ -316,6 +358,7 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 // 		search_->setInputCloud (input_, indices_);
 // 	}
 
+	int vlayerNum = m_vNumX * m_vNumY;
 	for(int ix=0; ix<m_vNumX; ++ix)
 	{
 		for(int iy=0; iy<m_vNumY; ++iy)
@@ -327,9 +370,11 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 				pcl::octree::OctreeKey	key_arg;
 				key_arg.x = ix; key_arg.y = iy; key_arg.z = iz;
 
-				VoxelMap::iterator it_voxel;
-				it_voxel=m_voxelMap.find(key_arg);
-				if(it_voxel == m_voxelMap.end())
+				int vId = iz*vlayerNum + iy*m_vNumX + ix;
+
+				std::vector<VoxelCell>::iterator it_voxel;
+				it_voxel = vNeighbourhood_.begin()+vId;
+				if(it_voxel == vNeighbourhood_.end())
 				{
 					PCL_ERROR("[pcl::UrbanRec::VoxelFCGraph] Missing voxel (%d, %d, %d)\n", ix, iy, iz);
 					continue;
@@ -341,23 +386,24 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 				cy = m_bbmin[1] + leaf_size_[1]*iy + 0.5*leaf_size_[1];
 				cz = m_bbmin[2] + leaf_size_[2]*iz + 0.5*leaf_size_[2];
 
-				it_voxel->second->feat.vRefPos = Eigen::Vector3f (cx, cy, cz);
+				if(it_voxel->voxel_att)
+					it_voxel->voxel_att->feat.vRefPos = Eigen::Vector3f (cx, cy, cz);
 
-				if(it_voxel->second->occupyFlag == null_voxel)
+				if(it_voxel->voxel_type == null_voxel)
 				{//null voxel
-					it_voxel->second->feat.ptsNum = 0;
+					//it_voxel->second->feat.ptsNum = 0;
 
 					continue;
 				}
-				else if(it_voxel->second->occupyFlag & occupied_voxel)
+				else if(it_voxel->voxel_type & occupied_voxel)
 				{//occupied and inner&occupied
 					//计算特征值和特征向量
 					
 					Eigen::Vector4f xyz_centroid_;
 					EIGEN_ALIGN16 Eigen::Matrix3f covariance_matrix_;
-					computeMeanAndCovarianceMatrix (*input_, *(it_voxel->second->getPointIndices()), covariance_matrix_, xyz_centroid_);
+					computeMeanAndCovarianceMatrix (*input_, *(it_voxel->voxel_att->getPointIndices()), covariance_matrix_, xyz_centroid_);
 
-					it_voxel->second->feat.centroid = xyz_centroid_.head<3>();
+					it_voxel->voxel_att->feat.centroid = xyz_centroid_.head<3>();
 
 					Eigen::EigenSolver<Eigen::Matrix3f> es(covariance_matrix_);
 
@@ -366,23 +412,23 @@ template <typename PointT/*, typename VoxelContainerT, typename BranchContainerT
 
 
 					Eigen::Vector3f nz(0,0,1);
-					it_voxel->second->feat.major_value_  = D(0,0);
-					it_voxel->second->feat.middle_value_ = D(1,1);
-					it_voxel->second->feat.minor_value_  = D(2,2);
+					it_voxel->voxel_att->feat.major_value_  = D(0,0);
+					it_voxel->voxel_att->feat.middle_value_ = D(1,1);
+					it_voxel->voxel_att->feat.minor_value_  = D(2,2);
 
-					it_voxel->second->feat.major_axis_ = V.row(0);
-					it_voxel->second->feat.middle_axis_ = V.row(1);
-					it_voxel->second->feat.minor_axis_ = V.row(2);
+					it_voxel->voxel_att->feat.major_axis_ = V.row(0);
+					it_voxel->voxel_att->feat.middle_axis_ = V.row(1);
+					it_voxel->voxel_att->feat.minor_axis_ = V.row(2);
 
-					if (nz.dot (it_voxel->second->feat.minor_axis_) < 0)
+					if (nz.dot (it_voxel->voxel_att->feat.minor_axis_) < 0)
 					{//consistently re-oriented
-						it_voxel->second->feat.major_axis_ *= -1;
-						it_voxel->second->feat.minor_axis_ *= -1;
+						it_voxel->voxel_att->feat.major_axis_ *= -1;
+						it_voxel->voxel_att->feat.minor_axis_ *= -1;
 					}
 				}
 				else
 				{//inner and no occupied voxel
-
+					continue;
 				}
 
 
@@ -516,8 +562,6 @@ template <typename PointT> bool
 // 		return (false);
 
 
-	int num_of_voxels = 
-
 	if (search_ == 0)
 		search_ = boost::shared_ptr<pcl::search::Search<PointT> > (new pcl::search::KdTree<PointT>);
 
@@ -534,17 +578,17 @@ template <typename PointT> bool
 
 	VertexDescriptor vertex_descriptor(0);
 	vertices_.clear ();
-	vertices_.resize (number_of_points + 2, vertex_descriptor);
+	vertices_.resize (num_of_occupied_ + 2, vertex_descriptor);
 
 	std::set<int> out_edges_marker;
 	edge_marker_.clear ();
-	edge_marker_.resize (number_of_points + 2, out_edges_marker);
+	edge_marker_.resize (num_of_occupied_ + 2, out_edges_marker);
 
-	for (int i_point = 0; i_point < number_of_points + 2; i_point++)
+	for (int i_point = 0; i_point < num_of_occupied_ + 2; i_point++)
 		vertices_[i_point] = boost::add_vertex (*graph_);
 
-	source_ = vertices_[number_of_points];
-	sink_ = vertices_[number_of_points + 1];
+	source_ = vertices_[num_of_occupied_];
+	sink_ = vertices_[num_of_occupied_ + 1];
 
 	//cor_seed_id.indices.clear();
 	//cor_seed_id.indices.resize(number_of_indices, -1);
@@ -556,16 +600,26 @@ template <typename PointT> bool
 
 //	cor_seed_id=new int[number_of_indices];
 
-	for (int i_point = 0; i_point < number_of_indices; i_point++)
+	int vlayerNum = m_vNumX * m_vNumY;
+	for(int iz=m_vNumZ-1; iz>=0; --iz)
 	{
-		int point_index = (*indices_)[i_point];
-		double source_weight = 0.0;
-		double sink_weight = 0.0;
-		//	calculateUnaryPotential (point_index, source_weight, sink_weight);
-		calculateUnaryPotential (point_index, source_weight, sink_weight);
-		//	fycalculateUnaryPotential2 (point_index, source_weight, sink_weight);
-		addEdge (static_cast<int> (source_), point_index, source_weight);
-		addEdge (point_index, static_cast<int> (sink_), sink_weight);
+		for(int ix=0; ix<m_vNumX; ++ix)
+		{
+			for(int iy=0; iy<m_vNumY; ++iy)
+			{
+				//int point_index = (*indices_)[i_point];
+				int vId = iz*vlayerNum + iy*m_vNumX + ix;
+
+				double source_weight = 0.0;
+				double sink_weight = 0.0;
+				//	calculateUnaryPotential (point_index, source_weight, sink_weight);
+				calculateUnaryPotential (vId, source_weight, sink_weight);
+				//	fycalculateUnaryPotential2 (point_index, source_weight, sink_weight);
+				addEdge (static_cast<int> (source_), vId, source_weight);
+				addEdge (vId, static_cast<int> (sink_), sink_weight);
+
+			}
+		}
 	}
 
 	std::vector<int> neighbours;

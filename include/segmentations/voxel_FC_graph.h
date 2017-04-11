@@ -77,14 +77,20 @@ namespace pcl
 
 			struct  VoxelCell
 			{
-				int voxel_type;
+				pcl::octree::OctreeKey	key_arg;  //ix, iy, iz
+				int voxel_type;   //occupied; inner; null
 				VoxelContainerPointIndices *voxel_att;
+				VoxelContainerPointIndices *father;
 			};
 
 // 			typedef boost::unordered_map<pcl::octree::OctreeKey, VoxelContainerPointIndices*>   VoxelMap;
 // 			VoxelMap m_voxelMap;
 
 			std::vector<VoxelCell> vNeighbourhood_;
+
+			uint32_t  num_of_occupied_;
+			uint32_t  num_of_inner_;
+			uint32_t  num_of_null_;
 
 
 			//∏ﬂ≥Ã„–÷µ
@@ -204,6 +210,10 @@ namespace pcl
 			void setDatatermParams(float heightTh, float alphaH);
 
 		protected:
+
+			//
+			int search_Neighbour(int vID, );
+
 			/** \brief This method simply builds the graph that will be used during the segmentation. */
 			bool buildGraph ();
 
