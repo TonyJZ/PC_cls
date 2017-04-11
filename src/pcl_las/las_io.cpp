@@ -11,33 +11,56 @@
 #include <iostream> // std::cout
 
 //bytes of point record in PCLPointCloud2
-
+static liblas::Header *header=NULL;
 pcl::LASReader::LASReader()
 {
-
+	header=NULL;
 }
 
 pcl::LASReader::~LASReader()
 {
+	if(header)	delete header;	header=NULL;
 }
 
-int pcl::LASReader::readHeader(const std::string & file_name, pcl::PCLPointCloud2 & cloud,
-	Eigen::Vector4f & origin, Eigen::Quaternionf & orientation,
-	int & file_version, int & data_type, unsigned int & data_idx, const int offset)
+int pcl::LASReader::readHeader (const std::string &file_name, pcl::PCLPointCloud2 &cloud,
+								Eigen::Vector4f &origin, Eigen::Quaternionf &orientation, 
+								int &file_version, int &data_type, unsigned int &data_idx, const int offset) 
 {
+	//using namespace liblas;
 	std::ifstream ifs;
 	ifs.open(file_name.c_str(), std::ios::in | std::ios::binary);
 
 	liblas::Reader reader(ifs);
 
-	liblas::Header const& header = reader.GetHeader();
+	if(header==NULL)
+		header =  new liblas::Header;
+
+	*header = reader.GetHeader();
 
 	//todo
-	file_version = header.GetVersionMajor()*10 + header.GetVersionMinor();
+//	file_version = header.GetVersionMajor()*10 + header.GetVersionMinor();
 
 	return 0;
 }
 
+int pcl::LASReader::getBoundingBox(double bbmax[3], double bbmin[3])
+{
+	if(header){
+	bbmin[0] = header->GetMinX();
+	bbmin[1] = header->GetMinY();
+	bbmin[2] = header->GetMinZ();
+
+	bbmax[0] =header->GetMaxX();
+	bbmax[1] =header->GetMaxY();
+	bbmax[2] =header->GetMaxZ();
+	}
+	else
+	{
+		assert(false);
+	}
+
+	return 0;
+}
 
 
 /*
@@ -69,6 +92,9 @@ int pcl::LASReader::read(const std::string & file_name,
 
 	liblas::Reader reader(ifs);
 
+	if(header==NULL)
+		header =  new liblas::Header;
+	*header = reader.GetHeader();
 
 	unsigned int idx = 0;
 
@@ -129,14 +155,51 @@ int pcl::LASReader::read(const std::string & file_name,
 		cloud.fields.push_back(f);
 	}
 
-	const int point_size = 38;
+	{
+		pcl::PCLPointField f;
+		f.datatype = pcl::PCLPointField::UINT16;
+		f.count= 1;
+		f.name="red";
+		f.offset =38;
+		cloud.fields.push_back(f);
+	}
+
+	{
+		pcl::PCLPointField f;
+		f.datatype = pcl::PCLPointField::UINT16;
+		f.count= 1;
+		f.name="green";
+		f.offset =40;
+		cloud.fields.push_back(f);
+	}
+
+	{
+		pcl::PCLPointField f;
+		f.datatype = pcl::PCLPointField::UINT16;
+		f.count= 1;
+		f.name="blue";
+		f.offset =42;
+		cloud.fields.push_back(f);
+	}
+
+	const int point_size = 44;
 	cloud.data.resize( reader.GetHeader().GetPointRecordsCount() * point_size);
 	cloud.height =1;
 	cloud.width = reader.GetHeader().GetPointRecordsCount();
 	cloud.point_step =point_size;
 
+	uint32_t ptsNum = cloud.width;
+	int interval = ptsNum/100;
+	int iStep=0;
+	PCL_INFO("point number: %d\n", ptsNum);
 	for(uint64_t i=0; reader.ReadNextPoint(); i++)
 	{
+		if((i%interval)==0)
+		{
+			PCL_INFO("reading point: %%%d\r", iStep);
+			iStep++;
+		}
+
 		liblas::Point const& p = reader.GetPoint();
 		*( (double *) ( cloud.data.data() +point_size*i     ) )=  p.GetX();
 		*( (double *) ( cloud.data.data() + point_size*i +8 ) )=  p.GetY();
@@ -144,6 +207,9 @@ int pcl::LASReader::read(const std::string & file_name,
 		*( (uint16_t *) ( cloud.data.data() + point_size*i +24) ) = p.GetIntensity();
 		*( (uint32_t *) ( cloud.data.data() + point_size*i +26) ) = p.GetClassification().GetClass();
 		*( (double *) ( cloud.data.data() + point_size*i +30) ) = p.GetTime();
+		*( (uint16_t *) ( cloud.data.data() + point_size*i +38) ) = p.GetColor().GetRed();
+		*( (uint16_t *) ( cloud.data.data() + point_size*i +40) ) = p.GetColor().GetGreen();
+		*( (uint16_t *) ( cloud.data.data() + point_size*i +42) ) = p.GetColor().GetBlue();
 	}
 	return cloud.width*cloud.height;
 }
@@ -220,6 +286,7 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 		uint16_t intensity;
 		uint32_t val; 
 		double time;
+		uint16_t r, g, b;
 
 		x = *( (double *) ( cloud.data.data() +point_size*i     ) );
 		y = *( (double *) ( cloud.data.data() + point_size*i +8 ) );
@@ -234,6 +301,10 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 
 		time = *( (double *) ( cloud.data.data() + point_size*i +30) );
 
+		r = *( (uint16_t *) ( cloud.data.data() + point_size*i +38) );
+		g = *( (uint16_t *) ( cloud.data.data() + point_size*i +40) );
+		b = *( (uint16_t *) ( cloud.data.data() + point_size*i +42) );
+
 		point.SetCoordinates(x, y, z);
 		point.SetIntensity(intensity);
 
@@ -246,6 +317,12 @@ int pcl::LASWriter::write(const std::string & file_name, const pcl::PCLPointClou
 		point.SetClassification(classif);
 
 		point.SetTime(time);
+
+		liblas::Color col;
+		col.SetRed(r);
+		col.SetGreen(g);
+		col.SetBlue(b);
+		point.SetColor(col);
 
 		try
 		{

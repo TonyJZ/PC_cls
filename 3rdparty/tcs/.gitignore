@@ -1,0 +1,10 @@
+*.png
+*.gif
+*.xcf
+*.pyc
+data/segmentation.pcd
+data/trunks/
+build/
+bin/
+lib/
+gui/gui.pro.user

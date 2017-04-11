@@ -65,6 +65,7 @@ Temporary Items
 *.res
 *.opensdf
 *.zip
+*.db
 
 # directories
 bin/
@@ -74,3 +75,9 @@ Lib/
 build/
 Build/
 zip/
+data/
+Data/
+vs2010/
+VS2010/
+vs2015/
+VS2015/

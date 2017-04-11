@@ -577,7 +577,7 @@ int merge_overlap_points(char *pOrgFile, char *pRefFile, float radius, char *pMe
 	return 0;
 }
 
-#include "segmentations/urban_partition.h"
+#include "3D_model/model_io.h"
 void test_output_voxel_model()
 {
 	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);

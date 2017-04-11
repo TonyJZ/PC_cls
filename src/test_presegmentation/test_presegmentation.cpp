@@ -22,6 +22,7 @@
 #include "segmentations/duplicate_removing.h"
 #include "segmentations/clustering_density_peaks.h"
 #include "segmentations/height_slicing.h"
+//#include "segmentations/PCL_Segmentations.h"
 
 //#define PCL_
 
@@ -746,6 +747,8 @@ bool comp(std::vector<int> left, std::vector<int> right)
 // #include <pcl/io/vtk_lib_io.h>
 // #include <pcl/visualization/cloud_viewer.h>
 #include "segmentations/urban_partition.h"
+#include "3D_model/ssg_voxel_grid_graph_builder.h"
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -769,10 +772,53 @@ int _tmain(int argc, _TCHAR* argv[])
 // 		"G:/pointcloud/Dundas_University/merged.las");
 // 	return 0;
 
-	test_output_voxel_model();
+	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+	pcl::LASReader lasreader;
+	Eigen::Vector4f origin;
+	Eigen::Quaternionf rot;
+	int fv;
+	pcl::PointCloud<MyLasPoint>::Ptr incloud (new pcl::PointCloud<MyLasPoint>); 
+
+	lasreader.read("G:/temp/test3_air_mob_merged.las",
+		*inCloud2, incloud->sensor_origin_, incloud->sensor_orientation_, fv);
+
+	pcl::fromPCLPointCloud2 (*inCloud2, *incloud);
+
+	double offset_ref_x = boost::math::iround( incloud->points[0].x);
+	double offset_ref_y = boost::math::iround( incloud->points[0].y);
+	double offset_ref_z = boost::math::iround( incloud->points[0].z);
+
+	if(fabs(offset_ref_x) < 10000) offset_ref_x = 0;
+	if(fabs(offset_ref_y) < 10000) offset_ref_y = 0;
+	if(fabs(offset_ref_z) < 10000) offset_ref_z = 0;
+
+	pcl::PointCloud<pcl::PointXYZ>::Ptr org_pts(new pcl::PointCloud<pcl::PointXYZ>);
+	org_pts->width = incloud->width;
+	org_pts->height = incloud->height;
+
+	for(int i=0; i<incloud->points.size(); i++)
+	{
+		pcl::PointXYZ pt;
+
+		pt.x = incloud->points[i].x - offset_ref_x;
+		pt.y = incloud->points[i].y - offset_ref_y;
+		pt.z = incloud->points[i].z - offset_ref_z;
+
+		org_pts->points.push_back(pt);
+	}
+
+// 	output_voxel_model(*org_pts, 2.0, "G:/temp/test3_airborne_2_voxel.ply", 
+// 		offset_ref_x, offset_ref_y, offset_ref_z,
+// 		"G:/temp/test3_airborne_2_centriod.las");
+
+
+	//build_voxel_adjacency_graph(*org_pts, 2.0);
+	build_voxel_FC_graph(*org_pts, 2.0);
+
 	return 0;
 
-	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
+
+/*	pcl::PCLPointCloud2::Ptr inCloud2(new pcl::PCLPointCloud2);
 	pcl::LASReader lasreader;
 	Eigen::Vector4f origin;
 	Eigen::Quaternionf rot;
@@ -1023,6 +1069,6 @@ int pointFilter_ApproximateProgressiveMorphological ()
 
 	writer.write<pcl::PointXYZ> ("ALTM_Strip_Dundas_object.pcd", *cloud_filtered, false);
 
-	return 0;
+	return 0;*/
 }
 

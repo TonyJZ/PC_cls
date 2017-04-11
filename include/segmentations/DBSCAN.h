@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+namespace DBS
+{
+
 #define UNCLASSIFIED -1
 #define NOISE 0
 
@@ -287,6 +290,8 @@ void dbscan(
 				++cluster_id;
 		}
 	}
+}
+
 }
 
 #endif

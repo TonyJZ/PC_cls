@@ -75,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>f:\debug</OutDir>
-    <TargetName>$(ProjectName)</TargetName>
+    <TargetName>$(ProjectName)D</TargetName>
     <IncludePath>F:\PC_cls\include;D:\pcl-1.8.0\io\include;D:\pcl-1.8.0\common\include;F:\pcl-1.8.0\vs2010\include;D:\Boost\boost_1_61_0;D:\Eigen\include;F:\libLAS-1.8.0\include;$(IncludePath)</IncludePath>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
@@ -109,7 +109,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>f:\libs\pcl_lasD.lib</ImportLibrary>
       <AdditionalLibraryDirectories>D:\Boost\lib\x64\lib;F:\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>liblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>liblasD.lib;pcl_common_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

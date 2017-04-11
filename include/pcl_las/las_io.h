@@ -14,6 +14,7 @@
 #include <pcl/point_types.h>
 
 
+
 struct EIGEN_ALIGN16 MyLasPoint              //定义点类型结构
 
 {
@@ -27,6 +28,10 @@ struct EIGEN_ALIGN16 MyLasPoint              //定义点类型结构
 	uint32_t label;
 
 	double gpstime;
+
+	uint16_t red;
+	uint16_t green;
+	uint16_t blue;
 
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW// 确保new操作符对齐操作
 
@@ -50,7 +55,15 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(MyLasPoint,// 注册点类型宏
 
 	(double, gpstime, gpstime)
 
+	(uint16_t, red, red)
+
+	(uint16_t, green, green)
+
+	(uint16_t, blue, blue)
+
 	)
+
+//class Header;
 
 namespace pcl{
 
@@ -79,10 +92,12 @@ class PCL_EXPORTS LASReader : public FileReader {
             * add a 512 byte header in front of the actual file, so set the offset
             * to the next byte after the header (e.g., 513).
             */
-          virtual int
-          readHeader (const std::string &file_name, pcl::PCLPointCloud2 &cloud,
-                      Eigen::Vector4f &origin, Eigen::Quaternionf &orientation,
-                      int &file_version, int &data_type, unsigned int &data_idx, const int offset = 0) ;
+		virtual int 
+			readHeader (const std::string &file_name, pcl::PCLPointCloud2 &cloud,
+						Eigen::Vector4f &origin, Eigen::Quaternionf &orientation, 
+						int &file_version, int &data_type, unsigned int &data_idx, const int offset = 0) ;
+
+		virtual int getBoundingBox(double bbmax[3], double bbmin[3]);
 
 
           /** \brief Read a point cloud data from a FILE file and store it into a sensor_msgs/PointCloud2.
@@ -101,7 +116,6 @@ class PCL_EXPORTS LASReader : public FileReader {
           read (const std::string &file_name, pcl::PCLPointCloud2 &cloud,
                 Eigen::Vector4f &origin, Eigen::Quaternionf &orientation, int &file_version ,
                 const int offset = 0);
-
 
   };
 
@@ -131,7 +145,7 @@ class PCL_EXPORTS LASReader : public FileReader {
 
 #include <pcl/ros/conversions.h>
 template <typename PointT>
-int write_LAS(char *pFileName, pcl::PointCloud<PointT> cloud, 
+int write_LAS(const char *pFileName, pcl::PointCloud<PointT> cloud, 
 	double xOffset, double yOffset, double zOffset)
 {
 	pcl::PointCloud<MyLasPoint>::Ptr las_cloud (new pcl::PointCloud<MyLasPoint>);

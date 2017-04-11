@@ -317,7 +317,7 @@ int supervoxel_segmentation (const pcl::PointCloud<PointT> &cloud_in, std::vecto
 	pcl::SupervoxelClustering<PointT> super (voxel_resolution, seed_resolution);
 // 	if (disable_transform)
 // 		super.setUseSingleCameraTransform (false);
-	super.setInputCloud (cloud_in);
+	super.setInputCloud (cloud_in.makeShared());
 	super.setColorImportance (color_importance);
 	super.setSpatialImportance (spatial_importance);
 	super.setNormalImportance (normal_importance);
