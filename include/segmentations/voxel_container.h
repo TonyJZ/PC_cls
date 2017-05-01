@@ -7,6 +7,7 @@
 #include <cstddef>
 
 #include <pcl/pcl_macros.h>
+#include <pcl/octree/octree_key.h>
 
 namespace pcl
 {
@@ -57,6 +58,9 @@ namespace pcl
 		public:
 			int		label;     //-1 unlabeled
 			int  occupyFlag;  //0: null, 1: occupied, 2: inner
+			int     vNo;      //±‡∫≈£¨∏®÷˙À„∑®”√
+
+			pcl::octree::OctreeKey	voxel_key;  //ix, iy, iz
 
 		public:
 			/** \brief Empty constructor. */

@@ -21,6 +21,7 @@
 #include <pcl_las/las_io.h>
 
 #include "feature_extract/StatisticalOutlierRemoval.h"
+#include "utilities/PointCloud_partition.h"
 
 #include "segmentations/voxel_FC_graph.h"
 
@@ -151,6 +152,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::vector<int> filterd_indices;
 
 	//1.‘§¥¶¿Ì
+//	pointcloud_partition_quadtree(*org_pts, 20, "E:/pointcloud/building_detection/");
+//	return 0;
+
+
 //	pcl_StatisticalOutlierRemoval (*org_pts, 50, 2.0, filterd_indices, true);
 
 //	Output_labled_pointcloud(*org_pts, filterd_indices, "G:\\pointcloud\\building_detection\\outliers.pcd");
@@ -206,7 +211,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	vGraph.voxel_features_extraction();
 
+//	std::vector <pcl::PointIndices> clusters;
+	vGraph.extract(/*clusters*/);
 
+	vGraph.saveSegmentedFile("E:/pointcloud/building_detection/b2", "b2");
 	return 0;
 }
 

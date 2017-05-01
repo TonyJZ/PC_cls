@@ -21,12 +21,23 @@ namespace pcl
 
 	namespace UrbanRec
 	{
-		template<typename PointT> 
-			//typename VoxelContainerT = VoxelContainerPointIndices
-			//typename BranchContainerT = OctreeContainerEmpty,
-			//typename OctreeT = OctreeBase<LeafContainerT, BranchContainerT> 
-		//>
 
+#define _Output_foreground_points_		1
+#define _Output_background_points_		2
+#define _Output_colored_points_			4
+
+		struct  VoxelCell
+		{
+			int voxel_type;   //occupied; inner; null
+			VoxelContainerPointIndices *voxel_att;
+			VoxelContainerPointIndices *father;
+		};
+
+		template<typename PointT> 
+		//typename VoxelContainerT = VoxelContainerPointIndices
+		//typename BranchContainerT = OctreeContainerEmpty,
+		//typename OctreeT = OctreeBase<LeafContainerT, BranchContainerT> 
+		//>
 		class VoxelFCGraph : public pcl::PCLBase<PointT>
 		{
 
@@ -75,18 +86,14 @@ namespace pcl
 		protected:
 			double m_bbmin[3], m_bbmax[3];
 
-			struct  VoxelCell
-			{
-				pcl::octree::OctreeKey	key_arg;  //ix, iy, iz
-				int voxel_type;   //occupied; inner; null
-				VoxelContainerPointIndices *voxel_att;
-				VoxelContainerPointIndices *father;
-			};
+			
 
 // 			typedef boost::unordered_map<pcl::octree::OctreeKey, VoxelContainerPointIndices*>   VoxelMap;
 // 			VoxelMap m_voxelMap;
 
 			std::vector<VoxelCell> vNeighbourhood_;
+
+			std::vector<pcl::octree::OctreeKey>  vLookupList_;  //voxel查找表，根据vNo找到对应的voxel_key。vNo从0开始顺序对voxel编号；voxel_key为八叉树编号
 
 			uint32_t  num_of_occupied_;
 			uint32_t  num_of_inner_;
@@ -97,16 +104,20 @@ namespace pcl
 			float height_above_ground_;
 			float alpha_h_;	
 
+
+			uint8_t  output_flag_;
+
 		protected:
 			/** \brief The size of a leaf. */
 			Eigen::Vector4f leaf_size_;
 			/** \brief Internal leaf sizes stored as 1/leaf_size_ for efficiency reasons. */ 
 			Eigen::Array4f inverse_leaf_size_;
 			/** \brief The minimum and maximum bin coordinates, the number of divisions, and the division multiplier. */
-			Eigen::Vector4i min_b_, max_b_, div_b_, divb_mul_;
+			//Eigen::Vector4i min_b_, max_b_, div_b_, divb_mul_;
 
 			//division num in x, y, z 
-			int m_vNumX, m_vNumY, m_vNumZ;
+			int vNumX_, vNumY_, vNumZ_;
+			int vLayerNum_;
 
 			Eigen::MatrixXd m_boundMark;
 
@@ -203,16 +214,24 @@ namespace pcl
 			//提取特征
 			void voxel_features_extraction();
 
-			void extract (std::vector <pcl::PointIndices>& clusters);
+			void extract (/*std::vector <pcl::PointIndices>& clusters*/);
 
 
 			////////////////parameters///////////////////////
 			void setDatatermParams(float heightTh, float alphaH);
 
+			
+			void setOutputFlag(uint8_t flag)
+			{
+				output_flag_ = flag;
+			};
+
+			int saveSegmentedFile ( char *pSaveDir, char *pSaveName );
+
 		protected:
 
-			//
-			int search_Neighbour(int vID, );
+			//搜索voxel邻域
+			int search_Neighbour(pcl::octree::OctreeKey	key_arg, std::vector<pcl::octree::OctreeKey> &k_indices);
 
 			/** \brief This method simply builds the graph that will be used during the segmentation. */
 			bool buildGraph ();
@@ -224,7 +243,7 @@ namespace pcl
 			* \param[out] sink_weight calculated weight for the (point, sink) edge
 			*/
 			void
-				calculateUnaryPotential (int point, double& source_weight, double& sink_weight) const;
+				calculateUnaryPotential (pcl::octree::OctreeKey	key_arg, double& source_weight, double& sink_weight);
 
 			/** \brief This method simply adds the edge from the source point to the target point with a given weight.
 			* \param[in] source index of the source point of the edge
@@ -240,13 +259,16 @@ namespace pcl
 			* \param[in] target index of the target point of the edge
 			*/
 			double
-				calculatePairwisePotential (int source, int target) const;
+				calculatePairwisePotential (pcl::octree::OctreeKey source, pcl::octree::OctreeKey target);
 			
 			/** \brief This method analyzes the residual network and assigns a label to every point in the cloud.
 			* \param[in] residual_capacity residual network that was obtained during the segmentation
 			*/
 			void
 				assembleLabels (ResidualCapacityMap& residual_capacity);
+
+			pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+				getColoredCloud (/* char *pSaveDir, bool saveFile */bool &has_fore);
 		};
 
 

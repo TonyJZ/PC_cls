@@ -108,7 +108,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>f:\libs\pcl_lasD.lib</ImportLibrary>
-      <AdditionalLibraryDirectories>D:\Boost\lib\x64\lib;F:\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\Boost\lib\x64\lib;F:\libs;F:\pcl-1.8.0\vs2010\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>liblasD.lib;pcl_common_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
