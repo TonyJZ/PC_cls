@@ -204,17 +204,33 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	//vGraph.setIndices();
 	
-	vx = vy = vz = 2.0;
+	vx = vy = vz = 1.0;
 	vGraph.setVoxelSize(vx, vy, vz);
 
 	vGraph.compute_FC_Voxels();
 
+//	vGraph.savePoints("E:/pointcloud/building_detection/b2/test.pcd");
+
 	vGraph.voxel_features_extraction();
 
 //	std::vector <pcl::PointIndices> clusters;
+
+	float gH = 57.0;  //地面高度
+	float min_bH = 6.0; //最小建筑物高度
+	float alpha = 0.5;
+
+	if(argc>2)
+		gH = atof(argv[2]);
+	if(argc>3)
+		min_bH = atof(argv[3]);
+	if(argc>4)
+		alpha = atof(argv[4]);
+
+	vGraph.setDatatermParams(gH+min_bH, alpha);
 	vGraph.extract(/*clusters*/);
 
-	vGraph.saveSegmentedFile("E:/pointcloud/building_detection/b2", "b2");
+	vGraph.saveSegmentedFile("E:/pointcloud/building_detection/b1", "b1");
+//	vGraph.saveVoxels("E:/pointcloud/building_detection/b1/b1_voxel.pcd");
 	return 0;
 }
 

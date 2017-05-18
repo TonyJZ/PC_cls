@@ -228,6 +228,10 @@ namespace pcl
 
 			int saveSegmentedFile ( char *pSaveDir, char *pSaveName );
 
+			//for debug
+			int savePoints(const char *fileName);  
+			int saveVoxels(const char *fileName);
+
 		protected:
 
 			//ËÑË÷voxelÁÚÓò

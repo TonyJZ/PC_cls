@@ -630,7 +630,7 @@ template <typename PointT> bool
 
 //	cor_seed_id=new int[number_of_indices];
 
-
+	std::vector<double> srcW, sinkW;
 	for(int iz=vNumZ_-1; iz>=0; --iz)
 	{
 		for(int ix=0; ix<vNumX_; ++ix)
@@ -655,6 +655,8 @@ template <typename PointT> bool
 				addEdge (static_cast<int> (source_), iter->voxel_att->vNo, source_weight);
 				addEdge (iter->voxel_att->vNo, static_cast<int> (sink_), sink_weight);
 
+				srcW.push_back(source_weight);
+				sinkW.push_back(sink_weight);
 			}
 		}
 	}
@@ -716,10 +718,10 @@ pcl::UrbanRec::VoxelFCGraph<PointT>::calculateUnaryPotential (pcl::octree::Octre
 		return;
 	}
 
-	float ratio_sink = 0.8;
+	float ratio_source = 0.8;
 	if((iter->voxel_type & occupied_voxel) != occupied_voxel)
 	{
-		sink_weight = ratio_sink;
+		source_weight = ratio_source;
 	}
 	else
 	{
@@ -727,12 +729,12 @@ pcl::UrbanRec::VoxelFCGraph<PointT>::calculateUnaryPotential (pcl::octree::Octre
 
 		float sigm_value = 1.0/(1.0 + alpha_h_*exp(-hdiff));
 
-		sink_weight = ratio_sink*exp(-sigm_value);
+		source_weight = ratio_source*exp(-sigm_value);
 	}
 	
 //	sink_weight = pow (min_dist_to_foreground / radius_, 0.5);
 
-	source_weight = 1 - sink_weight;
+	sink_weight = 1 - source_weight;
 	return;
 }
 
@@ -835,7 +837,7 @@ pcl::UrbanRec::VoxelFCGraph<PointT>::calculatePairwisePotential (pcl::octree::Oc
 	g2 = exp(-t*t/(2*sigma2*sigma2));
 	
 	double g = (beta1*g1+beta2*g2)/dis;
-	double sweig = exp(-g);
+	double sweig = exp(-g)*0.3;
 
 	return (sweig);
 }
@@ -854,11 +856,17 @@ pcl::UrbanRec::VoxelFCGraph<PointT>::assembleLabels (ResidualCapacityMap& residu
 	pcl::PointIndices segment;
 	clusters_.resize (2, segment);
 
+	std::vector<double> res;
+	res.resize(num_of_occupied_, 0);
+
 	OutEdgeIterator edge_iter, edge_end;
+	int i=0;
 	for ( boost::tie (edge_iter, edge_end) = boost::out_edges (source_, *graph_); edge_iter != edge_end; edge_iter++ )
 	{
 		pcl::octree::OctreeKey key_arg = vLookupList_[static_cast<int> (edge_iter->m_target)];
 		int vId = key_arg.z*vLayerNum_ + key_arg.y*vNumX_ + key_arg.x;
+
+		res[static_cast<int> (edge_iter->m_target)] = residual_capacity[*edge_iter];
 
 		if (residual_capacity[*edge_iter] > epsilon_)
 		{//background
@@ -868,6 +876,8 @@ pcl::UrbanRec::VoxelFCGraph<PointT>::assembleLabels (ResidualCapacityMap& residu
 		{//foreground
 			clusters_[1].indices.push_back (vId);
 		}
+
+		i++;
 	}
 }
 
@@ -884,16 +894,21 @@ template <typename PointT> int
 	k_indices.clear();
 
 	Eigen::MatrixXd neighbors;
-	int nn = 6;  //邻域数
+	int nn = 10;  //邻域数
 	neighbors = Eigen::MatrixXd::Constant(nn, 3, 0);
 
-	//6邻域定义
+	//10邻域定义
 	neighbors(0,0) = key_arg.x-1;	neighbors(0,1) = key_arg.y;		neighbors(0,2) = key_arg.z;
 	neighbors(1,0) = key_arg.x+1;	neighbors(1,1) = key_arg.y;		neighbors(1,2) = key_arg.z;
 	neighbors(2,0) = key_arg.x;		neighbors(2,1) = key_arg.y-1;	neighbors(2,2) = key_arg.z;
 	neighbors(3,0) = key_arg.x;		neighbors(3,1) = key_arg.y+1;	neighbors(3,2) = key_arg.z;
 	neighbors(4,0) = key_arg.x;		neighbors(4,1) = key_arg.y;		neighbors(4,2) = key_arg.z-1;
 	neighbors(5,0) = key_arg.x;		neighbors(5,1) = key_arg.y;		neighbors(5,2) = key_arg.z+1;
+
+	neighbors(6,0) = key_arg.x-1;	neighbors(6,1) = key_arg.y-1;	neighbors(6,2) = key_arg.z;
+	neighbors(7,0) = key_arg.x-1;	neighbors(7,1) = key_arg.y+1;	neighbors(7,2) = key_arg.z;
+	neighbors(8,0) = key_arg.x+1;	neighbors(8,1) = key_arg.y-1;	neighbors(8,2) = key_arg.z;
+	neighbors(9,0) = key_arg.x+1;	neighbors(9,1) = key_arg.y+1;	neighbors(9,2) = key_arg.z;
 
 	
 	for(int i=0; i<nn; i++)
@@ -937,14 +952,16 @@ template <typename PointT> int
 	if(clusters_.empty ())
 		return 0;
 
+	int vId;
+	std::vector<VoxelCell>::iterator it_voxel = vNeighbourhood_.begin();
+	pcl::PointXYZRGB ptc;
+
 	if(output_flag_ & _Output_foreground_points_)
 	{
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr fore_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
 		for(int iC=1; iC<clusters_.size(); ++iC)
 		{
-			pcl::PointXYZRGB ptc;
-			int point_index = 0;
 			fore_cloud->clear();
 
 			if(clusters_[iC].indices.size() == 0)
@@ -952,14 +969,21 @@ template <typename PointT> int
 
 			for(int i=0; i<clusters_[iC].indices.size(); ++i)
 			{
-				point_index = clusters_[iC].indices[i];
-				ptc.x = *(input_->points[point_index].data);
-				ptc.y = *(input_->points[point_index].data + 1);
-				ptc.z = *(input_->points[point_index].data + 2);
-				ptc.r = foreground_color[0];
-				ptc.g = foreground_color[1];
-				ptc.b = foreground_color[2];
-				fore_cloud->points.push_back(ptc);
+				vId = clusters_[iC].indices[i];
+
+				std::vector<int>::iterator it_pIdx = (it_voxel+vId)->voxel_att->getPointIndices()->begin();
+
+				for(; it_pIdx!=(it_voxel+vId)->voxel_att->getPointIndices()->end(); ++it_pIdx)
+				{
+					ptc.x = *(input_->points[*it_pIdx].data);
+					ptc.y = *(input_->points[*it_pIdx].data + 1);
+					ptc.z = *(input_->points[*it_pIdx].data + 2);
+					ptc.r = foreground_color[0];
+					ptc.g = foreground_color[1];
+					ptc.b = foreground_color[2];
+					fore_cloud->points.push_back(ptc);
+				}
+				
 			}
 
 			fore_cloud->width = fore_cloud->points.size();
@@ -975,19 +999,29 @@ template <typename PointT> int
 	if(output_flag_ & _Output_background_points_)
 	{
 		pcl::PointCloud<pcl::PointXYZRGB>::Ptr back_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-		int num_of_backpoints = static_cast<int> (clusters_[0].indices.size ());
-		back_cloud->width = 1;
-		back_cloud->height = num_of_backpoints;
+		
+		for(int i=0; i<clusters_[0].indices.size(); ++i)
+		{
+			vId = clusters_[0].indices[i];
+
+			std::vector<int>::iterator it_pIdx = (it_voxel+vId)->voxel_att->getPointIndices()->begin();
+
+			for(; it_pIdx!=(it_voxel+vId)->voxel_att->getPointIndices()->end(); ++it_pIdx)
+			{
+				ptc.x = *(input_->points[*it_pIdx].data);
+				ptc.y = *(input_->points[*it_pIdx].data + 1);
+				ptc.z = *(input_->points[*it_pIdx].data + 2);
+				ptc.r = background_color[0];
+				ptc.g = background_color[1];
+				ptc.b = background_color[2];
+				back_cloud->points.push_back(ptc);
+			}
+		}
+
+		back_cloud->width = back_cloud->points.size();
+		back_cloud->height = 1;
 		back_cloud->is_dense = input_->is_dense;
 
-		copyPointCloud(*input_, clusters_[0], *back_cloud);
-
-		for (int i_point = 0; i_point < num_of_backpoints; i_point++)
-		{
-			back_cloud->points[i_point].r = background_color[0];
-			back_cloud->points[i_point].g = background_color[1];
-			back_cloud->points[i_point].b = background_color[2];
-		}
 		writer.write<pcl::PointXYZRGB> (background, *back_cloud, true);
 	}
 
@@ -1011,68 +1045,197 @@ template <typename PointT> pcl::PointCloud<pcl::PointXYZRGB>::Ptr
 
 	if (!clusters_.empty ())
 	{
-		int num_of_background_pts = static_cast<int> (clusters_[0].indices.size ());
-		int num_of_foreground_pts = 0;
+		int num_of_background_voxel = static_cast<int> (clusters_[0].indices.size ());
+		int num_of_foreground_voxel = 0;
 
 		for(int iC=1; iC<clusters_.size(); ++iC)
 		{
-			num_of_foreground_pts += static_cast<int> (clusters_[iC].indices.size ());
+			num_of_foreground_voxel += static_cast<int> (clusters_[iC].indices.size ());
 		}
 
-		if(num_of_foreground_pts == 0)
+		if(num_of_foreground_voxel == 0)
 			has_fore = false;
 		else
 			has_fore = true;
 
-		int number_of_points = num_of_background_pts + num_of_foreground_pts;
+		int number_of_voxel = num_of_background_voxel + num_of_foreground_voxel;
 
 		colored_cloud = (new pcl::PointCloud<pcl::PointXYZRGB>)->makeShared ();
 		//    unsigned char foreground_color[3] = {255, 0, 0};//{255, 255, 255};  red
 		//    unsigned char background_color[3] = {255, 255, 255};//{255, 0, 0};  white
-		colored_cloud->width = number_of_points;
-		colored_cloud->height = 1;
-		colored_cloud->is_dense = input_->is_dense;
 
-		//Add by Han Zheng at MAY 21, 2015
-		// 	if( saveFile ){
-		// 		char foreground[MAX_PATH], background[MAX_PATH];
-		// 		sprintf(foreground,"%sForeground.pcd",pSaveDir );
-		// 		sprintf(background,"%sBackground.pcd",pSaveDir );
-		// 
-		// 		FILE *fpf = fopen(foreground,"w");
-		// 	}
+		int vId;
+		std::vector<VoxelCell>::iterator it_voxel = vNeighbourhood_.begin();
 
 		pcl::PointXYZRGB point;
 		int point_index = 0;
-		for (int i_point = 0; i_point < num_of_background_pts; i_point++)
+
+		for(int i=0; i<clusters_[0].indices.size(); ++i)
 		{
-			point_index = clusters_[0].indices[i_point];
-			point.x = *(input_->points[point_index].data);
-			point.y = *(input_->points[point_index].data + 1);
-			point.z = *(input_->points[point_index].data + 2);
+			vId = clusters_[0].indices[i];
+
+			std::vector<int>::iterator it_pIdx = (it_voxel+vId)->voxel_att->getPointIndices()->begin();
+
+			for(; it_pIdx!=(it_voxel+vId)->voxel_att->getPointIndices()->end(); ++it_pIdx)
+			{
+				point.x = *(input_->points[*it_pIdx].data);
+				point.y = *(input_->points[*it_pIdx].data + 1);
+				point.z = *(input_->points[*it_pIdx].data + 2);
+				point.r = background_color[0];
+				point.g = background_color[1];
+				point.b = background_color[2];
+				colored_cloud->points.push_back (point);
+			}
+		}
+
+
+		for(int iC=1; iC<clusters_.size(); ++iC)
+		{
+			if(clusters_[iC].indices.size() == 0)
+				continue;
+
+			for(int i=0; i<clusters_[iC].indices.size(); ++i)
+			{
+				vId = clusters_[iC].indices[i];
+
+				std::vector<int>::iterator it_pIdx = (it_voxel+vId)->voxel_att->getPointIndices()->begin();
+
+				for(; it_pIdx!=(it_voxel+vId)->voxel_att->getPointIndices()->end(); ++it_pIdx)
+				{
+					point.x = *(input_->points[*it_pIdx].data);
+					point.y = *(input_->points[*it_pIdx].data + 1);
+					point.z = *(input_->points[*it_pIdx].data + 2);
+					point.r = foreground_color[0];
+					point.g = foreground_color[1];
+					point.b = foreground_color[2];
+					colored_cloud->points.push_back (point);
+				}
+			}
+		}
+	}
+
+	colored_cloud->width = colored_cloud->size();
+	colored_cloud->height = 1;
+	colored_cloud->is_dense = input_->is_dense;
+
+	return (colored_cloud);
+}
+
+template <typename PointT> int
+	pcl::UrbanRec::VoxelFCGraph<PointT>::savePoints ( const char *fileName )
+{
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+	pcl::PCDWriter writer;
+
+	std::vector<VoxelCell>::iterator it_voxel;
+	
+	for(it_voxel = vNeighbourhood_.begin(); it_voxel!=vNeighbourhood_.end(); ++it_voxel)
+	{
+		if((it_voxel->voxel_type & occupied_voxel) != occupied_voxel)
+			continue;
+		
+		std::vector<int>::iterator it_pIdx = it_voxel->voxel_att->getPointIndices()->begin();
+
+		for(; it_pIdx!=it_voxel->voxel_att->getPointIndices()->end(); ++it_pIdx)
+		{
+			pcl::PointXYZRGB ptc;
+
+			ptc.x = *(input_->points[*it_pIdx].data);
+			ptc.y = *(input_->points[*it_pIdx].data + 1);
+			ptc.z = *(input_->points[*it_pIdx].data + 2);
+
+			if((it_voxel->voxel_type & inner_voxel) == inner_voxel)
+			{
+				ptc.r = 255;
+				ptc.g = 0;
+				ptc.b = 0;
+
+			}
+			else
+			{
+				ptc.r = 0;
+				ptc.g = 0;
+				ptc.b = 255;
+			}
+
+			colored_cloud->points.push_back(ptc);
+		}
+
+	}
+
+	colored_cloud->width = colored_cloud->points.size();
+	colored_cloud->height = 1;
+	colored_cloud->is_dense = input_->is_dense;
+
+	//sprintf(foreground,"%s\\%s_%03dfgd.pcd",pSaveDir, pSaveName, iC );
+	
+
+	return writer.write<pcl::PointXYZRGB> (fileName, *colored_cloud, true);;
+}
+
+template <typename PointT> int
+	pcl::UrbanRec::VoxelFCGraph<PointT>::saveVoxels ( const char *fileName )
+{
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr colored_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+	pcl::PCDWriter writer;
+
+	std::vector<VoxelCell>::iterator it_voxel;
+
+	if (!clusters_.empty ())
+	{
+		int num_of_background_voxel = static_cast<int> (clusters_[0].indices.size ());
+		int num_of_foreground_voxel = 0;
+
+		
+
+		int vId;
+		it_voxel = vNeighbourhood_.begin();
+
+		pcl::PointXYZRGB point;
+		
+		for(int i=0; i<clusters_[0].indices.size(); ++i)
+		{
+			vId = clusters_[0].indices[i];
+
+			point.x = (it_voxel+vId)->voxel_att->feat.vRefPos[0];
+			point.y = (it_voxel+vId)->voxel_att->feat.vRefPos[1];
+			point.z = (it_voxel+vId)->voxel_att->feat.vRefPos[2];
 			point.r = background_color[0];
 			point.g = background_color[1];
 			point.b = background_color[2];
 			colored_cloud->points.push_back (point);
 		}
 
+
 		for(int iC=1; iC<clusters_.size(); ++iC)
 		{
-			for (int i_point = 0; i_point < clusters_[iC].indices.size (); i_point++)
+			if(clusters_[iC].indices.size() == 0)
+				continue;
+
+			for(int i=0; i<clusters_[iC].indices.size(); ++i)
 			{
-				point_index = clusters_[iC].indices[i_point];
-				point.x = *(input_->points[point_index].data);
-				point.y = *(input_->points[point_index].data + 1);
-				point.z = *(input_->points[point_index].data + 2);
+				vId = clusters_[iC].indices[i];
+
+				point.x = (it_voxel+vId)->voxel_att->feat.vRefPos[0];
+				point.y = (it_voxel+vId)->voxel_att->feat.vRefPos[1];
+				point.z = (it_voxel+vId)->voxel_att->feat.vRefPos[2];
 				point.r = foreground_color[0];
 				point.g = foreground_color[1];
 				point.b = foreground_color[2];
 				colored_cloud->points.push_back (point);
+
+				num_of_foreground_voxel += static_cast<int> (clusters_[iC].indices.size ());
 			}
 		}
 	}
 
-	return (colored_cloud);
+	colored_cloud->width = colored_cloud->size();
+	colored_cloud->height = 1;
+	colored_cloud->is_dense = input_->is_dense;
+
+	return writer.write<pcl::PointXYZRGB> (fileName, *colored_cloud, true);;
 }
 
 #endif
